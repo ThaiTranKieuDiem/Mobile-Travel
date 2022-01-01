@@ -10,15 +10,28 @@ import {
 
 import IconIon from 'react-native-vector-icons/Ionicons';
 import IconFont5 from 'react-native-vector-icons/FontAwesome5';
+import {useNavigation} from '@react-navigation/native';
 
 function CustomerNoLogin(props) {
-  const {onClickLogin, onClickRegister} = props;
+  const {onClickLogin, onClickRegister, onClickSecurity, onClickMyTour} = props;
+  const navigation = useNavigation();
 
   const handleClickLogin = () => {
     if (onClickLogin) onClickLogin();
   };
   const handleClickRegister = () => {
     if (onClickRegister) onClickRegister();
+  };
+
+  const handleClickMyTour = () => {
+    if (onClickMyTour) {
+      onClickMyTour();
+    }
+  };
+  const handleClickSecurity = () => {
+    if (onClickSecurity) {
+      onClickSecurity();
+    }
   };
   return (
     <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
@@ -155,7 +168,11 @@ function CustomerNoLogin(props) {
                 color="#747875"
                 style={[style.icon, {backgroundColor: '#D2D4D2'}]}
               />
-              <Text style={[style.text, {fontSize: 17}]}>Về MyTour.vn</Text>
+              <Text
+                style={[style.text, {fontSize: 17}]}
+                onPress={handleClickMyTour}>
+                Về MyTour.vn
+              </Text>
             </View>
             <View
               style={{
@@ -169,7 +186,9 @@ function CustomerNoLogin(props) {
                 color="#747875"
                 style={[style.icon, {backgroundColor: '#D2D4D2'}]}
               />
-              <Text style={[style.text, {fontSize: 17}]}>
+              <Text
+                style={[style.text, {fontSize: 17}]}
+                onPress={handleClickSecurity}>
                 Chính sách bảo mật
               </Text>
             </View>

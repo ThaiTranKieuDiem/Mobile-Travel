@@ -7,14 +7,20 @@ const customerApi = {
     return axiosClient.post(`${url}/AccessToken`, params);
   },
 
+  //checkPhone
+  Cli_CheckPhoneCustomer: params => {
+    return axiosClient.get(`${url}/MB_Cli_CheckPhoneCustomer`, {params});
+  },
+
   //register
   Cli_RegisterCustomer: params => {
     return axiosClient.post(`${url}/MB_Cli_RegisterCustomer`, params);
   },
 
-  //checkPhone
-  Cli_CheckPhoneCustomer: params => {
-    return axiosClient.get(`${url}/MB_Cli_CheckPhoneCustomer`, {params});
+  //register update phonenumber
+
+  MB_RegisterPhoneNumber: params => {
+    return axiosClient.put(`${url}/MB_RegisterPhoneNumber`, params);
   },
 
   //get inforCustomer

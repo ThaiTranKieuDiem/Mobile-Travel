@@ -5,33 +5,14 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Text,
 } from 'react-native';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 import {Formik} from 'formik';
-import TagGroup from 'react-native-tag-group';
-
-const tagGroup = [
-  'Hồ Chí Minh',
-  ' Hà Nội',
-  ' Lâm Đồng',
-  ' Đà Nẵng',
-  ' Kiên Giang',
-  'Bà Rịa - Vũng Tàu',
-  ' Cần Thơ',
-  ' Khánh Hòa',
-  ' Bình Định',
-  ' Hải Phòng',
-  ' Lai Châu',
-  'Quảng Nam',
-  'Hà Giang',
-  'Phú Yên',
-  'An Giang',
-  'Ninh Bình',
-];
+import FilterPage from './FilterPage';
 
 function SearchHome(props) {
   const {navigation} = props;
-  const [state, setState] = useState('');
 
   const initialValues = {
     page: 1,
@@ -45,17 +26,6 @@ function SearchHome(props) {
     });
   };
 
-  const handleClickProvince = values => {
-    const params = {
-      page: 1,
-      limit: 10,
-      provinceName: values.toString(),
-    };
-    console.log(params);
-    navigation.navigate('TouristAttractionSearchPr', {
-      params: params,
-    });
-  };
   return (
     <SafeAreaView
       style={{flex: 1, backgroundColor: '#fff', paddingHorizontal: 15}}>
@@ -95,17 +65,7 @@ function SearchHome(props) {
         </Formik>
       </View>
       <View style={style.content}>
-        <TagGroup
-          //ref={ref => (tagGroup = ref)}
-          source={tagGroup}
-          tagStyle={{
-            height: 35,
-            borderColor: '#fff',
-            backgroundColor: '#f8f8f8',
-          }}
-          textStyle={{fontSize: 14, fontFamily: 'Poppins-Light'}}
-          onSelectedTagChange={handleClickProvince}
-        />
+        <FilterPage />
       </View>
     </SafeAreaView>
   );
@@ -116,8 +76,7 @@ const style = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    height: 100,
-
+    height: 80,
     marginTop: 10,
   },
   search: {

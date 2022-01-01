@@ -20,12 +20,15 @@ import {Cli_AccessToken} from './../../Slice/SliceCustomer';
 import {unwrapResult} from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
+import {showMessage, hideMessage} from 'react-native-flash-message';
+import IconIon from 'react-native-vector-icons/Ionicons';
 
 function LoginPage(props) {
   const {navigation} = props;
   const dispatch = useDispatch();
   const [login, setLogin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkPass, setCheckPass] = useState(false);
 
   const initialValues = {
     email: '',
@@ -53,13 +56,20 @@ function LoginPage(props) {
             'accessTokenCustomer',
             JSON.stringify(payload),
           );
+          showMessage({
+            message: 'Đăng nhập thành công',
+            type: 'success',
+          });
           navigation.navigate('HomePage');
         })
         .catch(err => {
           setLogin(false);
           setLoading(false);
-          Alert.alert('Tài khoản không hợp lệ');
-          console.log(err);
+          showMessage({
+            message: 'Tài khoản không hợp lệ',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
         });
     }, 3000);
   };
@@ -156,15 +166,30 @@ function LoginPage(props) {
                       {errors.email}
                     </Text>
                   )}
-                  <TextInput
-                    placeholder="Mật khẩu"
-                    placeholderTextColor="#B0B0B0"
-                    style={style.textInput}
-                    name="password"
-                    onChangeText={handleChange('password')}
-                    onBlur={handleBlur('password')}
-                    value={values.password}
-                  />
+                  <View style={style.passwordContainer}>
+                    <TextInput
+                      placeholder="Mật khẩu"
+                      placeholderTextColor="#B0B0B0"
+                      style={{
+                        flex: 1,
+                        color: '#000',
+                        fontSize: 16,
+                        fontFamily: 'Poppins-Light',
+                      }}
+                      autoCorrect={false}
+                      secureTextEntry={checkPass === true ? false : true}
+                      name="password"
+                      onChangeText={handleChange('password')}
+                      onBlur={handleBlur('password')}
+                      value={values.password}
+                    />
+                    <IconIon
+                      name="eye-outline"
+                      color="#000"
+                      size={24}
+                      onPress={() => setCheckPass(true)}
+                    />
+                  </View>
                   {errors.password && (
                     <Text
                       style={{
@@ -254,10 +279,18 @@ const style = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins-Medium',
     width: '100%',
-
     borderRadius: 10,
     textAlign: 'center',
     padding: 15,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#F0F8FF',
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    alignItems: 'center',
   },
 });
 

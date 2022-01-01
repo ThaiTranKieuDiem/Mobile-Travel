@@ -4,11 +4,9 @@ import WelcomePage from '../Pages/WelcomePage';
 import TourDetails from '../Pages/TourPage/TourDetailPage';
 import TabNavigationHome from './TabNavigation';
 import BookTourPage from '../Pages/BookingTour/BookTourPage';
-import InforMationTicket from '../Pages/BookingTour/InforMationTicket';
 import TabNavigation from './TabNavigationPageTour';
 import LoginPage from '../Pages/Customer/LoginPage';
 import RegisterPage from '../Pages/Customer/RegisterPage';
-import OtpRegisterPage from './../Pages/Customer/OtpRegisterPage';
 import SearchPage from '../Pages/Search/SearchHome';
 import TouristAttractionPage from './../Pages/TouristAtraction/TouristAtractionPage';
 import RegisterInfo from './../Pages/Customer/RegisterInfro';
@@ -16,6 +14,11 @@ import TouristAttractionSearchPr from './../Pages/TouristAtraction/TouristAttrac
 import TouristAtractionDetails from './../Pages/TouristAtraction/TouristAtractionDetails';
 import InfomationCustomer from './../Pages/Customer/InfomationCustomer';
 import ChangePasswordPage from './../Pages/Customer/ChangePasswordPage';
+import PaymentMethodPage from '../Pages/BookingTour/PaymentmethodPage';
+import PaymenTicketPage from './../Pages/BookingTour/PaymentTicketPage';
+import InforMationTicket from './../Pages/BookingTour/InformationTicket';
+import FilterPage from './../Pages/Search/FilterPage';
+import BookedCancel from './../Pages/cart/BookedCancel';
 
 const Stack = createNativeStackNavigator();
 function StackNavigation() {
@@ -59,8 +62,8 @@ function StackNavigation() {
       />
       <Stack.Screen
         options={{headerShown: false}}
-        name="InformationTicket"
-        component={InforMationTicket}
+        name="PaymenTicketPage"
+        component={PaymenTicketPage}
       />
       {/** */}
       <Stack.Screen
@@ -72,11 +75,6 @@ function StackNavigation() {
         options={{headerShown: false}}
         name="RegisterPage"
         component={RegisterPage}
-      />
-      <Stack.Screen
-        options={{headerShown: false}}
-        name="OtpRegisterPage"
-        component={OtpRegisterPage}
       />
       <Stack.Screen
         options={{title: 'Đăng ký thành viên'}}
@@ -118,6 +116,26 @@ function StackNavigation() {
         options={{title: 'Đổi mật khẩu'}}
         name="ChangePassword"
         component={ChangePasswordPage}
+      />
+      <Stack.Screen
+        options={{title: 'Phương thức thanh toán'}}
+        name="PaymentMethodPage"
+        component={PaymentMethodPage}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="InforMationTicket"
+        component={InforMationTicket}
+      />
+      <Stack.Screen
+        options={{title: 'Bộ lọc tìm kiếm'}}
+        name="FilterPage"
+        component={FilterPage}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="BookedCancelPage"
+        component={BookedCancel}
       />
     </Stack.Navigator>
   );

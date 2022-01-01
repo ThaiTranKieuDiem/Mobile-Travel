@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {Cli_GetTouristAttrDetails} from './../../Slice/SliceTouristAttrac';
 import {unwrapResult} from '@reduxjs/toolkit';
@@ -9,17 +17,19 @@ import {
 } from 'react-native-image-header-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LottieView from 'lottie-react-native';
+import Swiper from 'react-native-swiper';
 
 function TouristAtractionDetails(props) {
   const {navigation, route} = props;
+  const baseURL = 'http://192.168.1.81:8000/ImagesTouristAttractions/';
   //
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [imageList, setImageList] = useState([]);
   //
   const dispatch = useDispatch();
   //
   const {touristAttrId} = route.params;
-  console.log('touristAttrId', touristAttrId);
 
   useEffect(() => {
     dispatch(Cli_GetTouristAttrDetails(touristAttrId))
@@ -27,6 +37,16 @@ function TouristAtractionDetails(props) {
       .then(payload => {
         setData(payload);
         setLoading(false);
+        if (payload.imagesList === null) {
+          setImageList([]);
+        } else {
+          const re = '||';
+          let arrayObj = String(payload.imagesList).split(re);
+          arrayObj.pop();
+          arrayObj.map(item =>
+            setImageList(prev => prev.concat(baseURL + item)),
+          );
+        }
       })
       .catch(err => {
         console.log(err);
@@ -60,33 +80,70 @@ function TouristAtractionDetails(props) {
       />
       <ImageHeaderScrollView
         maxHeight={300}
-        minHeight={100}
-        headerImage={{uri: data.imagesList}}>
-        <TriggeringView style={style.content}>
-          <View>
-            <Text style={style.textName} numberOfLines={2}>
-              {data.touristAttrName}
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
-              <Icon
-                name="place"
-                size={28}
-                color="#ffa500"
-                style={{marginRight: 5}}
+        minHeight={75}
+        headerImage={{uri: imageList[0]}}
+        renderForeground={() => (
+          <Swiper
+            loop
+            autoplay
+            style={{height: 300}}
+            dot={
+              <View
+                style={{
+                  width: 10,
+                  height: 3,
+                  margin: 5,
+                  backgroundColor: 'white',
+                }}
               />
-              <Text style={style.textProvince}>{data.provinceName}</Text>
+            }
+            activeDot={
+              <View
+                style={{
+                  width: 10,
+                  height: 3,
+                  margin: 5,
+                  backgroundColor: '#ff4500',
+                }}
+              />
+            }>
+            {imageList.map((item, index) => {
+              return (
+                <View key={index}>
+                  <Image style={style.image} source={{uri: item}} />
+                </View>
+              );
+            })}
+          </Swiper>
+        )}>
+        <TriggeringView>
+          <View style={style.content}>
+            <View>
+              <Text style={style.textName}>{data.touristAttrName}</Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Icon
+                  name="place"
+                  size={28}
+                  color="#ffa500"
+                  style={{marginRight: 5}}
+                />
+                <Text style={style.textProvince}>{data.provinceName}</Text>
+              </View>
             </View>
-          </View>
-          <View style={{marginTop: 10}}>
-            <Text
-              style={[style.textDescription, {fontFamily: 'Poppins-Medium'}]}>
-              Chi tiết địa điểm tham quan
-            </Text>
-            <Text style={style.textDescription}>{data.description}</Text>
+            <View style={{marginTop: 10}}>
+              <Text
+                style={[
+                  style.textDescription,
+                  {fontFamily: 'Poppins-Medium', color: '#4682B4'},
+                ]}>
+                Chi tiết địa điểm tham quan
+              </Text>
+              <Text style={style.textDescription}>{data.description}</Text>
+            </View>
           </View>
         </TriggeringView>
       </ImageHeaderScrollView>
@@ -98,6 +155,7 @@ const style = StyleSheet.create({
   content: {
     paddingHorizontal: 15,
     paddingVertical: 10,
+    flex: 2,
   },
   textName: {
     color: '#000',
@@ -107,7 +165,7 @@ const style = StyleSheet.create({
   },
   textProvince: {
     color: '#ffa500',
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Pacifico-Regular',
     fontSize: 20,
   },
   textDescription: {
@@ -115,6 +173,10 @@ const style = StyleSheet.create({
     fontFamily: 'Poppins-Light',
     fontSize: 18,
     lineHeight: 30,
+  },
+  image: {
+    height: 300,
+    resizeMode: 'cover',
   },
 });
 

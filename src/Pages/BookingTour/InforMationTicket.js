@@ -1,274 +1,442 @@
-import React, {forwardRef} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
-  Text,
   View,
   SafeAreaView,
   ScrollView,
+  Text,
   StyleSheet,
   StatusBar,
-  TextInput,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/AntDesign';
+import IconIon from 'react-native-vector-icons/Ionicons';
+import IconMa from 'react-native-vector-icons/Entypo';
+import {useDispatch, useSelector} from 'react-redux';
+import {Cli_GetTourBooked} from '../../Slice/SliceBookingTour';
+import {unwrapResult} from '@reduxjs/toolkit';
+import LottieView from 'lottie-react-native';
+import {
+  ImageHeaderScrollView,
+  TriggeringView,
+} from 'react-native-image-header-scroll-view';
 import {formatPrice} from '../../utils/FormatNumber';
-import {Formik} from 'formik';
+import {MB_DeleteTourBooked} from './../../Slice/SliceBookingTour';
+import {Alert} from 'react-native';
+import Spinner from 'react-native-loading-spinner-overlay';
+import {showMessage, hideMessage} from 'react-native-flash-message';
 
 function InforMationTicket(props) {
   const {navigation, route} = props;
-  //
-  const {tour} = route.params;
-  const {ticket} = route.params;
-  //
-  //console.log(tour);
-  //console.log(ticket);
+  const {pID} = route.params;
 
-  const initialValues = {
-    name: '',
-    phoneNumber: '',
-    email: '',
-    address: '',
-  };
+  const [booked, setBooked] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingClick, setLoadingClick] = useState(false);
 
-  const SumMoney = () => {
-    let sum =
-      ticket.adult * tour.adultUnitPrice +
-      ticket.children * tour.childrenUnitPrice +
-      ticket.baby * tour.babyUnitPrice;
-    return sum;
-  };
+  const dispatch = useDispatch();
 
+  useEffect(() => {
+    setTimeout(() => {
+      const fetchApi = () => {
+        const params = {
+          pID: pID,
+        };
+        dispatch(Cli_GetTourBooked(params))
+          .then(unwrapResult)
+          .then(payload => {
+            setBooked(payload);
+            console.log(payload);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.log(err);
+            setLoading(false);
+          });
+      };
+      fetchApi();
+    }, 1000);
+  }, []);
+
+  ///render số lượng người và vé
   const numberPeople = () => {
     var people = [];
-    console.log(ticket.adult);
-    if (ticket.adult > 0) {
+    if (booked.quanityAdult >= 0) {
       people.push(
-        <Text style={style.text} key={1}>
-          {ticket.adult} x Người lớn
-        </Text>,
+        <View key={1} style={[style.flex, {justifyContent: 'flex-start'}]}>
+          <Icon name="tagso" size={24} color="#87CEFA" />
+          <Text style={[style.text, {marginLeft: 5}]}>
+            {booked.quanityAdult} x Người lớn
+          </Text>
+        </View>,
       );
     }
-    if (ticket.children > 0) {
+    if (booked.quanityChildren >= 0) {
       people.push(
-        <Text style={style.text} key={2}>
-          {ticket.children} x Trẻ em
-        </Text>,
+        <View key={2} style={[style.flex, {justifyContent: 'flex-start'}]}>
+          <Icon name="tagso" size={24} color="#87CEFA" />
+          <Text style={[style.text, {marginLeft: 5}]}>
+            {booked.quanityChildren} x Trẻ em
+          </Text>
+        </View>,
       );
     }
-    if (ticket.baby > 0) {
+    if (booked.quanityBaby >= 0) {
       people.push(
-        <Text style={style.text} key={3}>
-          {ticket.baby} x Em bé
-        </Text>,
+        <View key={3} style={[style.flex, {justifyContent: 'flex-start'}]}>
+          <Icon name="tagso" size={24} color="#87CEFA" />
+          <Text style={[style.text, {marginLeft: 5}]}>
+            {booked.quanityBaby} x Trẻ nhỏ
+          </Text>
+        </View>,
+      );
+    }
+
+    if (booked.quanityBaby >= 0) {
+      people.push(
+        <View key={4} style={[style.flex, {justifyContent: 'flex-start'}]}>
+          <Icon name="tagso" size={24} color="#87CEFA" />
+          <Text style={[style.text, {marginLeft: 5}]}>
+            {booked.quanityInfant} x Em bé
+          </Text>
+        </View>,
       );
     }
     return <View>{people}</View>;
   };
 
+  const totalMoney = loading
+    ? 0
+    : booked.totalMoney === undefined
+    ? 0
+    : booked.totalMoney;
+  //////
+  const surcharge = loading
+    ? 0
+    : booked.surcharge === undefined
+    ? 0
+    : booked.surcharge;
+  ///
+  const totalMoneyBooking = loading
+    ? 0
+    : booked.totalMoneyBooking === undefined
+    ? 0
+    : booked.totalMoneyBooking;
+  ///
+  const discount = loading
+    ? 0
+    : booked.discount === undefined
+    ? 0
+    : booked.discount;
+
+  ////
+  const handleClickDelete = () => {
+    setLoadingClick(true);
+    const params = {
+      BookingTourID: pID,
+    };
+    setTimeout(() => {
+      dispatch(MB_DeleteTourBooked(params))
+        .then(unwrapResult)
+        .then(payload => {
+          setLoadingClick(false);
+          navigation.navigate('BookedCancelPage');
+        })
+        .catch(err => {
+          setLoadingClick(false);
+          showMessage({
+            message: err.message,
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        });
+    }, 1500);
+  };
+  ///
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+        }}>
+        <LottieView
+          source={require('../../asset/animation/84272-loading-colour.json')}
+          autoPlay
+          loop
+        />
+      </View>
+    );
+  }
   return (
-    <SafeAreaView style={{backgroundColor: '#F8F8F8', flex: 1}}>
+    <SafeAreaView style={{flex: 1}}>
+      <Spinner
+        visible={loadingClick}
+        textContent=""
+        textStyle={{color: '#FFF'}}
+        animation="fade"
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          textAlign: 'center',
+          paddingTop: 30,
+          backgroundColor: '#ecf0f1',
+          padding: 8,
+        }}
+      />
       <StatusBar
         translucent
-        barStyle="dark-content"
+        barStyle="light-content"
         backgroundColor="rgba(0,0,0,0)"
       />
-      <View style={style.header}>
-        <Icon
-          name="arrow-back-ios"
-          size={28}
-          color="#4682B4"
-          onPress={navigation.goBack}
-        />
-        <View
-          style={{
-            alignItems: 'center',
-            width: '85%',
-          }}>
-          <Text
-            style={{
-              color: '#4682B4',
-              fontSize: 23,
-              fontFamily: 'Montserrat-Medium',
-            }}>
-            Hoàn tất vé
-          </Text>
-        </View>
-      </View>
-      <ScrollView>
-        <View style={style.ticket}>
-          <Text style={[style.textBold]}>Vé tour du lịch {tour.tourName}</Text>
-          <View>{numberPeople()}</View>
-          <Text style={style.text}>{tour.dateStart}</Text>
-          <Text style={[style.textBold, {color: '#FF4500', fontSize: 20}]}>
-            {formatPrice(SumMoney())}
-          </Text>
-        </View>
-        <Formik
-          initialValues={initialValues}
-          onSubmit={values => console.log(values)}>
-          {({handleChange, handleBlur, handleSubmit, values}) => (
-            <View>
-              <View style={style.ticket}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Icon
-                    name="align-vertical-center"
-                    color="#FF4500"
-                    size={24}
-                  />
-                  <Text style={style.textBold}>Thông tin liên lạc</Text>
-                </View>
-                <TextInput
-                  style={[style.textInput]}
-                  placeholder="Họ tên khách hàng đăng ký..."
-                  name="name"
-                  onChangeText={handleChange('name')}
-                  onBlur={handleBlur('name')}
-                  value={values.name}
-                />
-                <TextInput
-                  style={style.textInput}
-                  placeholder="Số điện thoại khách hàng đăng ký..."
-                  name="phoneNumber"
-                  onChangeText={handleChange('phoneNumber')}
-                  onBlur={handleBlur('phoneNumber')}
-                  value={values.phoneNumber}
-                />
-                <TextInput
-                  style={style.textInput}
-                  placeholder="Email khách hàng đăng ký..."
-                  name="email"
-                  onChangeText={handleChange('email')}
-                  onBlur={handleBlur('email')}
-                  value={values.email}
-                />
-                <TextInput
-                  style={style.textInput}
-                  placeholder="Địa chỉ khách hàng đăng ký..."
-                  name="address"
-                  onChangeText={handleChange('address')}
-                  onBlur={handleBlur('address')}
-                  value={values.address}
-                />
-              </View>
-
-              <View style={[style.ticket]}>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Icon
-                    name="align-vertical-center"
-                    color="#FF4500"
-                    size={24}
-                  />
-                  <Text style={style.textBold}>Tóm tắt thanh toán</Text>
-                </View>
-                <View style={style.flex}>
-                  <Text style={[style.text, {fontSize: 18}]}>Tổng cộng</Text>
-                  <Text style={style.textBold}>{formatPrice(SumMoney())}</Text>
-                </View>
-                <View style={style.flex}>
-                  <Text style={[style.text, {fontSize: 18}]}>Tổng giảm</Text>
-                  <Text style={style.textBold}>{formatPrice(SumMoney())}</Text>
-                </View>
-                <View style={style.flex}>
-                  <Text style={[style.text, {fontSize: 18}]}>
-                    Phương thức thanh toán
-                  </Text>
-                  <Icon
-                    style={{padding: 10}}
-                    name="arrow-forward-ios"
-                    color="#000"
-                    size={24}
-                  />
-                </View>
-                <View style={[style.flex]}>
-                  <Text style={[style.text, {fontSize: 18}]}>Thanh toán </Text>
-                  <Text
-                    style={[style.textBold, {color: '#FF4500', fontSize: 24}]}>
-                    {formatPrice(SumMoney())}
-                  </Text>
-                </View>
-              </View>
+      <ImageHeaderScrollView
+        maxHeight={300}
+        minHeight={75}
+        headerImage={{uri: booked.tourImg}}
+        renderForeground={() => (
+          <View>
+            <View style={{marginTop: 130, paddingHorizontal: 15}}>
               <Text
                 style={{
-                  padding: 20,
-                  backgroundColor: '#FAF0E6',
-                  color: '#000',
-                  fontSize: 16,
-                  fontFamily: 'Poppins-Light',
-                }}>
-                Xin kiểm tra thông tin cẩn thẩn. Khi đã gửi sẽ không thể thay
-                đổi.
+                  color: '#fff',
+                  fontSize: 27,
+                  fontFamily: 'Pacifico-Regular',
+                  backgroundColor: 'rgba(0,0,0, 0.5)',
+                  padding: 10,
+                  borderRadius: 20,
+                }}
+                numberOfLines={2}>
+                {booked.tourName}
               </Text>
-              <View
+            </View>
+          </View>
+        )}>
+        <TriggeringView>
+          <View style={style.content}>
+            <View style={[style.box, {borderColor: '#fff', marginBottom: 20}]}>
+              <Text
                 style={{
-                  alignItems: 'center',
-                  backgroundColor: '#fff',
+                  color: '#FF4500',
+                  fontSize: 24,
+                  fontFamily: 'DancingScript-VariableFont_wght',
+                  textAlign: 'center',
+                  padding: 10,
                 }}>
-                <Text
-                  style={{
-                    width: '93%',
-                    backgroundColor: '#4682B4',
-                    padding: 10,
-                    color: '#fff',
-                    fontSize: 18,
-                    fontFamily: 'Poppins-Bold',
-                    textAlign: 'center',
-                    borderRadius: 10,
-                  }}
-                  onPress={handleSubmit}>
-                  Thanh toán
+                {booked.journeys}
+              </Text>
+              <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                <Icon name="calendar" size={24} color="#87CEFA" />
+                <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                  <Text style={[style.text, {marginLeft: 5}]}>
+                    {booked.dateStart} -
+                  </Text>
+                  <Text style={[style.text, {marginLeft: 5}]}>
+                    {booked.dateEnd}
+                  </Text>
+                </View>
+              </View>
+              <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                <IconIon name="car-sport-outline" size={24} color="#87CEFA" />
+                <Text style={[style.text, {marginLeft: 5}]}>Máy bay</Text>
+              </View>
+              <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                <IconIon name="location-outline" size={24} color="#87CEFA" />
+                <Text style={[style.text, {marginLeft: 5}]}>
+                  {booked.departurePlaceFrom}
                 </Text>
               </View>
             </View>
-          )}
-        </Formik>
-      </ScrollView>
+            <View style={{marginBottom: 20}}>
+              <Text
+                style={{
+                  color: '#FF4500',
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: 12,
+                }}>
+                Thông tin khách hàng
+              </Text>
+              <View style={style.box}>
+                <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                  <Icon name="user" size={24} color="#87CEFA" />
+                  <Text style={[style.text, {marginLeft: 5}]}>
+                    {booked.customerName}
+                  </Text>
+                </View>
+                <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                  <Icon name="phone" size={24} color="#87CEFA" />
+                  <Text style={[style.text, {marginLeft: 5}]}>
+                    {booked.phoneNumber}
+                  </Text>
+                </View>
+                <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                  <IconIon name="mail-open-outline" size={24} color="#87CEFA" />
+                  <Text style={[style.text, {marginLeft: 5}]}>
+                    {booked.email}
+                  </Text>
+                </View>
+                <View style={[style.flex, {justifyContent: 'flex-start'}]}>
+                  <IconMa name="address" size={24} color="#87CEFA" />
+                  <Text style={[style.text, {marginLeft: 5}]}>
+                    {booked.address}
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={{marginBottom: 20}}>
+              <Text
+                style={{
+                  color: '#FF4500',
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: 12,
+                }}>
+                Thông tin loại vé
+              </Text>
+              <View style={style.box}>{numberPeople()}</View>
+            </View>
+            <View>
+              <Text
+                style={{
+                  color: '#FF4500',
+                  fontFamily: 'Poppins-Medium',
+                  fontSize: 12,
+                }}>
+                Thông tin thanh toán
+              </Text>
+              <View style={style.box}>
+                <View style={style.flex}>
+                  <Text style={[style.text]}>Tiền vé</Text>
+                  <Text style={style.textBold}>
+                    {formatPrice(totalMoneyBooking)}
+                  </Text>
+                </View>
+                <View style={[style.flex]}>
+                  <Text style={[style.text]}>Tiền giảm</Text>
+                  <Text style={style.textBold}>{formatPrice(discount)}</Text>
+                </View>
+                <View style={[style.flex]}>
+                  <Text style={[style.text]}>Phụ phí</Text>
+                  <Text style={style.textBold}>{formatPrice(surcharge)}</Text>
+                </View>
+                <View style={[style.flex]}>
+                  <Text Text style={[style.text]}>
+                    Phương thức
+                  </Text>
+                  <Text Text style={[style.text]}>
+                    {booked.typePayment === 1
+                      ? 'Thanh toán tiền mặt'
+                      : 'Chuyển khoản'}
+                  </Text>
+                </View>
+                <View
+                  style={[
+                    style.flex,
+                    {borderBottomWidth: 2, borderBottomColor: '#FF4500'},
+                  ]}>
+                  <Text Text style={[style.text]}>
+                    Tình trạng
+                  </Text>
+                  <Text Text style={[style.text]}>
+                    {booked.status === false
+                      ? 'Chưa thanh toán '
+                      : 'Đã thanh toán'}
+                  </Text>
+                </View>
+                <View style={[style.flex]}>
+                  <Text style={[style.text, {fontSize: 18}]}>Tổng tiền </Text>
+                  <Text
+                    style={[style.textBold, {color: '#FF4500', fontSize: 24}]}>
+                    {formatPrice(totalMoney)}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </View>
+          <View style={style.footer}>
+            <View style={style.button}>
+              <Text style={style.btnText} onPress={handleClickDelete}>
+                Hủy Tour
+              </Text>
+              <Text
+                style={style.btnText}
+                onPress={() => navigation.navigate('HomePage')}>
+                Tiếp tục
+              </Text>
+            </View>
+          </View>
+        </TriggeringView>
+      </ImageHeaderScrollView>
     </SafeAreaView>
   );
 }
 
 const style = StyleSheet.create({
-  header: {
+  content: {
+    flex: 2,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     backgroundColor: '#fff',
-    padding: 20,
-    justifyContent: 'flex-start',
-    width: '100%',
-    alignItems: 'flex-end',
-    height: 100,
-    flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#f8f8f8',
+    position: 'relative',
   },
-  ticket: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-    marginBottom: 20,
+  flex: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 5,
+  },
+  text: {
+    color: '#000',
+    fontSize: 16,
+    fontFamily: 'Poppins-Light',
+  },
+  money: {
+    color: '#FF4500',
+    fontSize: 18,
+    fontFamily: 'Salsa-Regular',
+  },
+  box: {
+    borderColor: '#fff',
+    borderWidth: 2,
+    padding: 15,
+    borderRadius: 15,
+    shadowColor: '#FF4500',
+    shadowOpacity: 0.26,
+    shadowOffset: {width: 0, height: 2},
+    shadowRadius: 10,
+    elevation: 10,
+    backgroundColor: 'white',
+    marginVertical: 5,
   },
   textBold: {
     fontSize: 19,
     fontFamily: 'Poppins-Medium',
     color: '#000',
-    padding: 10,
   },
-  text: {
-    fontSize: 16,
-    fontFamily: 'Poppins-Light',
-    color: '#000',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-  },
-  flex: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    borderBottomColor: '#f8f8f8',
-    borderBottomWidth: 2,
-    alignItems: 'center',
-    //paddingHorizontal: 10,
-  },
-  textInput: {
-    fontSize: 16,
-    fontFamily: 'Poppins-Light',
+  footer: {
+    height: 80,
+    backgroundColor: '#87CEFA',
     width: '100%',
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 5,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  button: {
+    width: '90%',
+    height: 80,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  btnText: {
+    color: '#87CEFA',
+    backgroundColor: '#fff',
+    padding: 10,
+    fontFamily: 'Poppins-Medium',
+    fontSize: 18,
+    borderRadius: 15,
+    width: 150,
+    textAlign: 'center',
   },
 });
 

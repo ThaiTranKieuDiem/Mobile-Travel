@@ -18,8 +18,8 @@ function TabNavigationHome(props) {
         title = 'Home';
         break;
       case 'cart':
-        iconName = 'heart';
-        title = 'favorite';
+        iconName = 'cart';
+        title = 'Cart';
         break;
       case 'Account':
         iconName = 'person';

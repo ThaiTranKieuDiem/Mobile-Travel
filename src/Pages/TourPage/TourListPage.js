@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -28,6 +29,14 @@ function TourListPage(props) {
     page: 1,
     limit: 10,
   });
+
+  const scrolling = useRef(new Animated.Value(0)).current;
+  const translation = scrolling.interpolate({
+    inputRange: [100, 130],
+    outputRange: [-100, 0],
+    extrapolate: 'clamp',
+  });
+
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -36,23 +45,16 @@ function TourListPage(props) {
         .then(unwrapResult)
         .then(payload => {
           setDataTour(prev => prev.concat(payload?.data));
-          console.log(payload.data);
           setLoading(false);
         })
         .catch(err => {
           console.log(err);
+          setLoading(false);
         });
     };
     fetchApi();
   }, [params]);
 
-  const renderFooter = () => {
-    return isLoading ? (
-      <View>
-        <ActivityIndicator />
-      </View>
-    ) : null;
-  };
   const handleLoadMore = () => {
     setParams({
       ...params,
@@ -61,15 +63,24 @@ function TourListPage(props) {
     setLoading(true);
   };
 
-  return (
-    <SafeAreaView
-      style={{flex: 1, position: 'relative', backgroundColor: '#f8f8f8'}}>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0)"
-      />
+  const renderFooter = () => {
+    return isLoading ? (
+      <View>
+        <ActivityIndicator />
+      </View>
+    ) : null;
+  };
+
+  const renderHeader = () => {
+    return (
       <View style={style.header}>
+        <Icon
+          name="arrow-back-ios"
+          size={28}
+          color={Colors.white}
+          onPress={() => navigation.navigate('HomePage')}
+          style={{position: 'absolute', top: 50, left: 20, zIndex: 3}}
+        />
         <Text style={style.title}>Tin nổi không?</Text>
         <Text style={style.text}>Tour giá sốc chỉ có trên Mytour</Text>
         <Image
@@ -87,37 +98,97 @@ function TourListPage(props) {
         />
         <Image style={[style.image, {top: 100, left: 10}]} source={hot_deals} />
       </View>
-      <View style={{flex: 3, marginTop: 10}}>
-        <FlatList
-          data={dataTour}
-          renderItem={({item}) => (
-            <View>
-              <TourFavorite tour={item} />
-            </View>
-          )}
-          keyExtractor={item => item.tourId}
-          contentContainerStyle={{marginHorizontal: 5}}
-          ListFooterComponent={renderFooter}
-          onEndReached={handleLoadMore}
-        />
-      </View>
-      <Icon
-        name="arrow-back-ios"
-        size={28}
-        color={Colors.white}
-        onPress={() => navigation.navigate('HomePage')}
-        style={{position: 'absolute', top: 50, left: 20}}
+    );
+  };
+
+  return (
+    <SafeAreaView
+      style={{flex: 1, position: 'relative', backgroundColor: '#f8f8f8'}}>
+      <StatusBar
+        translucent
+        barStyle="light-content"
+        backgroundColor="rgba(0,0,0,0)"
       />
+
+      <Animated.FlatList
+        data={dataTour}
+        renderItem={({item}) => (
+          <View>
+            <TourFavorite tour={item} />
+          </View>
+        )}
+        keyExtractor={item => item.tourId}
+        ListFooterComponent={renderFooter}
+        onEndReached={handleLoadMore}
+        ListHeaderComponent={renderHeader}
+        scrollEventThrottle={16}
+        onScroll={Animated.event(
+          [
+            {
+              nativeEvent: {
+                contentOffset: {
+                  y: scrolling,
+                },
+              },
+            },
+          ],
+          {useNativeDriver: true},
+        )}
+      />
+      <Animated.View
+        style={{
+          transform: [{translateY: translation}],
+          position: 'absolute',
+          backgroundColor: '#fff',
+          height: 100,
+          top: 0,
+          borderBottomColor: '#f8f8f8',
+          borderBottomWidth: 2,
+          width: '100%',
+          padding: 20,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5,
+        }}>
+        <StatusBar
+          translucent
+          barStyle="dark-content"
+          backgroundColor="rgba(0,0,0,0)"
+        />
+        <View style={{flexDirection: 'row', marginTop: 30}}>
+          <Icon
+            name="arrow-back-ios"
+            size={28}
+            color="#000"
+            onPress={navigation.goBack}
+          />
+          <Text
+            style={{
+              color: '#000',
+              fontSize: 23,
+              fontFamily: 'Montserrat-Medium',
+              marginLeft: 50,
+            }}>
+            Tin nổi không?
+          </Text>
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
 
 const style = StyleSheet.create({
   header: {
-    flex: 1,
     backgroundColor: '#FF4500',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: 180,
   },
   title: {
     color: '#ffe4b5',

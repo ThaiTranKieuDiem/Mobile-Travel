@@ -11,7 +11,7 @@ export const Cli_GetTourTourIsSuggest = createAsyncThunk(
     } catch (error) {
       return thunkApi.rejectWithValue({
         error: error.message,
-       // status: error.response.status,
+        // status: error.response.status,
         //message: error.response.data,
       });
     }
@@ -29,7 +29,7 @@ export const Cli_GetTourListPagination = createAsyncThunk(
       return thunkApi.rejectWithValue({
         error: error.message,
         //status: error.response.status,
-       //message: error.response.data,
+        //message: error.response.data,
       });
     }
   },
@@ -85,7 +85,7 @@ const tourSlice = createSlice({
       state.loadTourList = 'loading';
     });
     builder.addCase(Cli_GetTourListPagination.fulfilled, (state, {payload}) => {
-      //state.tourList =  payload;
+      state.tourList = payload;
       state.loadTourList = 'loaded';
     });
     builder.addCase(Cli_GetTourListPagination.rejected, (state, action) => {

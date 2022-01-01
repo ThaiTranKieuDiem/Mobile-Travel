@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import StackNavigation from './src/navigation/StackNavigation';
 import {Provider} from 'react-redux';
 import store from './src/App/Store';
 import {useEffect} from 'react';
 import {useState} from 'react';
 import LottieView from 'lottie-react-native';
 import {View} from 'react-native';
+import FlashMessage from 'react-native-flash-message';
+import Navigation from './src/navigation/Navigation';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -41,9 +41,18 @@ function App() {
   }
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <StackNavigation />
-      </NavigationContainer>
+      <View style={{flex: 1}}>
+        <Navigation />
+        <FlashMessage
+          icon="auto"
+          duration={3000}
+          style={{marginTop: 50}}
+          animated
+          animationDuration={500}
+          floating={true}
+          textStyle={{fontSize: 16, fontFamily:"Poppins-Medium"}}
+        />
+      </View>
     </Provider>
   );
 }

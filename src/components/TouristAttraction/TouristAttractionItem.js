@@ -3,8 +3,9 @@ import {Text, View, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 function TouristAttractionItem(props) {
-  const {data, onClick} = props;
+  const {data} = props;
   const navigation = useNavigation();
+  const BaseUrlServer = 'http://192.168.1.81:8000/ImagesTouristAttractions/';
 
   const handleClick = values => {
     const params = {
@@ -12,6 +13,7 @@ function TouristAttractionItem(props) {
     };
     navigation.navigate('TouristAttrDetailPage', {touristAttrId: params});
   };
+
   return (
     <View>
       <TouchableOpacity
@@ -19,7 +21,10 @@ function TouristAttractionItem(props) {
         onPress={() => {
           handleClick(data.touristAttrId);
         }}>
-        <Image style={style.image} source={{uri: `${data.imagesList}`}} />
+        <Image
+          style={style.image}
+          source={{uri: BaseUrlServer + data.imagesList}}
+        />
         <View style={{top: -65, marginLeft: 10}}>
           <Text
             numberOfLines={1}

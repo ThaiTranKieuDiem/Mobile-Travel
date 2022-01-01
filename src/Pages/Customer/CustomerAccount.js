@@ -4,10 +4,17 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import IconIon from 'react-native-vector-icons/Ionicons';
 import IconFont5 from 'react-native-vector-icons/FontAwesome5';
 import IconAnt from 'react-native-vector-icons/AntDesign';
-import Spinner from 'react-native-loading-spinner-overlay';
+
 
 function CustomerAccount(props) {
-  const {navigation, onClickLogout, onClickInfo} = props;
+  const {
+    onClickLogout,
+    onClickInfo,
+    onClickTourBookedCancel,
+    onClickSecurity,
+    onClickMyTour,
+    name
+  } = props;
   const [loading, setLoading] = useState(false);
 
   const handleClickLogout = async () => {
@@ -15,8 +22,26 @@ function CustomerAccount(props) {
       onClickLogout();
     }
   };
-  const handleClick = () => {
+  const handleClickInfo = () => {
     if (onClickInfo) onClickInfo();
+  };
+
+  const handleClickBookedCancel = () => {
+    if (onClickTourBookedCancel) {
+      onClickTourBookedCancel();
+    }
+  };
+
+  const handleClickSecurity = () => {
+    if (onClickSecurity) {
+      onClickSecurity();
+    }
+  };
+
+  const handleClickMyTour = () => {
+    if (onClickMyTour) {
+      onClickMyTour();
+    }
   };
 
   return (
@@ -27,14 +52,12 @@ function CustomerAccount(props) {
         backgroundColor="rgba(0,0,0,0)"
       />
       <View style={style.header}>
-        <IconIon
-          name="settings"
-          size={24}
-          color="#fff"
-          style={{textAlign: 'right', marginTop: 30, marginRight: 20}}
-          onPress={() => navigation.navigate('CustomerSetting')}
-        />
-        <View style={{alignItems: 'center', justifyContent: 'flex-end'}}>
+        <View
+          style={{
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            marginTop: 50,
+          }}>
           <Icon name="user-circle-o" size={80} color="#fff" />
           <Text
             style={{
@@ -43,16 +66,7 @@ function CustomerAccount(props) {
               fontFamily: 'Poppins-Medium',
               marginTop: 10,
             }}>
-            Tên khách hàng
-          </Text>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 16,
-              fontFamily: 'Poppins-Medium',
-            }}
-            onPress={handleClick}>
-            Thông tin của tôi...
+            {name}
           </Text>
         </View>
       </View>
@@ -63,9 +77,22 @@ function CustomerAccount(props) {
             borderBottomWidth: 1,
             paddingBottom: 20,
           }}>
-          <View View style={style.flex}>
+          <View style={style.flex}>
             <IconFont5
-              name="tag"
+              name="user-edit"
+              size={20}
+              color="#fff"
+              style={[style.icon, {backgroundColor: '#FFE4B5'}]}
+            />
+            <Text
+              style={[style.text, {fontSize: 17}]}
+              onPress={handleClickInfo}>
+              Thông tin của tôi
+            </Text>
+          </View>
+          <View View style={style.flex}>
+            <Icon
+              name="heart"
               size={23}
               color="#fff"
               style={[style.icon, {backgroundColor: '#E6E6FA'}]}
@@ -73,23 +100,16 @@ function CustomerAccount(props) {
             <Text style={[style.text, {fontSize: 17}]}>Tour đã tham gia</Text>
           </View>
           <View style={style.flex}>
-            <Icon
-              name="heart"
+            <IconFont5
+              name="tag"
               size={23}
               color="#fff"
               style={[style.icon, {backgroundColor: '#FFC0CB'}]}
             />
-            <Text style={[style.text, {fontSize: 17}]}>Tour yêu thích</Text>
-          </View>
-          <View style={style.flex}>
-            <IconAnt
-              name="clockcircle"
-              size={23}
-              color="#fff"
-              style={[style.icon, {backgroundColor: '#FFE4B5'}]}
-            />
-            <Text style={[style.text, {fontSize: 17}]}>
-              Tour đã xem gần đây
+            <Text
+              style={[style.text, {fontSize: 17}]}
+              onPress={handleClickBookedCancel}>
+              Tour đã hủy
             </Text>
           </View>
         </View>
@@ -104,7 +124,11 @@ function CustomerAccount(props) {
               color="#747875"
               style={[style.icon, {backgroundColor: '#D2D4D2'}]}
             />
-            <Text style={[style.text, {fontSize: 17}]}>Về MyTour.vn</Text>
+            <Text
+              style={[style.text, {fontSize: 17}]}
+              onPress={handleClickMyTour}>
+              Về MyTour.vn
+            </Text>
           </View>
           <View style={style.flex}>
             <IconIon
@@ -113,7 +137,11 @@ function CustomerAccount(props) {
               color="#747875"
               style={[style.icon, {backgroundColor: '#D2D4D2'}]}
             />
-            <Text style={[style.text, {fontSize: 17}]}>Chính sách bảo mật</Text>
+            <Text
+              style={[style.text, {fontSize: 17}]}
+              onPress={handleClickSecurity}>
+              Chính sách bảo mật
+            </Text>
           </View>
           <View style={style.flex}>
             <IconIon

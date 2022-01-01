@@ -19,6 +19,7 @@ import {unwrapResult} from '@reduxjs/toolkit';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as yup from 'yup';
 import {Cli_CheckPhoneCustomer} from './../../Slice/SliceCustomer';
+import {showMessage, hideMessage} from 'react-native-flash-message';
 
 function RegisterPage(props) {
   const {navigation} = props;
@@ -34,24 +35,33 @@ function RegisterPage(props) {
       .string()
       .trim()
       .required('* Số điện thoại không để trống')
-      .matches(phoneRegExp, '* Số điện thoại không hợp lệ'),
+      .matches(phoneRegExp, '* Số điện thoại không hợp lệ')
+      .min(10, '* Số điện thoại không hợp lệ')
+      .max(10, '* Số điện thoại không hợp lệ'),
   });
 
   const handleRegister = values => {
     setLoading(true);
-    console.log(values.phoneNumber);
     setTimeout(async () => {
       dispatch(Cli_CheckPhoneCustomer(values))
         .then(unwrapResult)
         .then(payload => {
+          const checkPhone = payload.customerName !== undefined ? true : false;
           setLoading(false);
-          navigation.navigate('RegisterInfo', {params: values.phoneNumber});
+          navigation.navigate('RegisterInfo', {
+            params: values.phoneNumber,
+            checkPhone: checkPhone,
+          });
         })
         .catch(err => {
           setLoading(false);
-          Alert.alert(err.message);
+          showMessage({
+            message: err.message,
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
         });
-    }, 1500);
+    }, 1000);
   };
 
   return (
@@ -70,6 +80,11 @@ function RegisterPage(props) {
           backgroundColor: '#ecf0f1',
           padding: 8,
         }}
+      />
+      <StatusBar
+        translucent
+        barStyle="dark-content"
+        backgroundColor="rgba(0,0,0,0)"
       />
       <View style={style.header}>
         <Icon

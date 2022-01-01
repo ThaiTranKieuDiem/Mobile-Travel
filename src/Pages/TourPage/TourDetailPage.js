@@ -34,19 +34,21 @@ function TourDetailPage(props) {
   const [clickIcon, setClickIon] = useState(false);
   const [scheduleArray, setScheduleArray] = useState([]);
   const [arrayTouristAttrName, setArrayTouristAttrName] = useState([]);
+
   //
   const dispatch = useDispatch();
   //
-  const {tourId} = route.params;
+  const {tourID} = route.params;
 
   //console.log(tourId);
 
   useEffect(() => {
-    dispatch(Cli_GetTourDescriptionById(tourId))
+    dispatch(Cli_GetTourDescriptionById(tourID))
       .then(unwrapResult)
       .then(payload => {
         setLoading(false);
         setTourDetail(payload);
+
         var finalArray = payload.tourDetails.map(function (obj) {
           return obj.touristAttrName;
         });
@@ -77,6 +79,10 @@ function TourDetailPage(props) {
       childrenUnitPrice: tourDetail.childrenUnitPrice,
       dateStart: tourDetail.dateStart,
       surcharge: tourDetail.surcharge,
+      quanity: tourDetail.quanity,
+      travelTypeId: tourDetail.travelTypeId,
+      groupNumber: tourDetail.groupNumber,
+      promotion: tourDetail.promotion,
     };
     //
     navigation.navigate('Booking', {params: params});
@@ -85,12 +91,11 @@ function TourDetailPage(props) {
 
   const handleClickIcon = async () => {
     setClickIon(true);
-    var finalArray = tourDetail.tourDetails.map(function (obj) {
-      return obj.touristAttrName;
-    });
     console.log(finalArray);
   };
 
+  const promotion = (tourDetail.adultUnitPrice * tourDetail.promotion) / 100;
+  const promotionBaby = (tourDetail.babyUnitPrice * tourDetail.promotion) / 100;
   /////
   const prince = loading
     ? 0
@@ -148,6 +153,14 @@ function TourDetailPage(props) {
       )}`,
   };
 
+  const renderRating = rate => {
+    var rating = [];
+    for (let i = 0; i < rate; i++) {
+      rating.push(<IconAnt key={i} name="star" color="#ffa500" size={40} />);
+    }
+    return <View style={{flexDirection: 'row'}}>{rating}</View>;
+  };
+
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: Colors.white}}>
       <StatusBar
@@ -168,33 +181,8 @@ function TourDetailPage(props) {
                 justifyContent: 'space-between',
                 marginTop: 150,
               }}>
-              <Text
-                style={{
-                  color: Colors.white,
-                  marginBottom: 18,
-                  fontSize: 28,
-                  fontFamily: 'Pacifico-Regular',
-                  width: '70%',
-                }}>
-                <Icon
-                  name="place"
-                  size={28}
-                  color={Colors.white}
-                  style={{marginRight: 20}}
-                />
-                .{tourDetail.departurePlaceTo}
-              </Text>
               <View style={{flexDirection: 'row', marginTop: 20}}>
-                <IconAnt name="star" color="#ffa500" size={40} />
-                <Text
-                  style={{
-                    color: Colors.white,
-                    fontWeight: 'bold',
-                    fontSize: 30,
-                    marginLeft: 10,
-                  }}>
-                  {tourDetail.rating}
-                </Text>
+                {renderRating(tourDetail.rating)}
               </View>
             </View>
           </View>
@@ -215,6 +203,19 @@ function TourDetailPage(props) {
               {tourDetail.tourName}
             </Text>
           </View>
+          <View>
+            <Text
+              style={{
+                color: '#ffa500',
+                fontSize: 22,
+                fontFamily: 'Salsa-Regular',
+                textDecorationLine: 'line-through',
+              }}>
+              {formatPrice(prince)}{' '}
+              {princeBaby === 0 ? '' : `- ${formatPrice(princeBaby)}`}
+            </Text>
+          </View>
+
           <View
             style={{
               flexDirection: 'row',
@@ -227,15 +228,11 @@ function TourDetailPage(props) {
                 fontSize: 22,
                 fontFamily: 'Salsa-Regular',
               }}>
-              {formatPrice(prince)} - {formatPrice(princeBaby)}
+              {formatPrice(prince - promotion)}{' '}
+              {princeBaby === 0
+                ? ''
+                : `- ${formatPrice(princeBaby - promotionBaby)}`}
             </Text>
-            <IconMa
-              name="heart-multiple"
-              color={clickIcon === true ? '#ED1F21' : 'grey'}
-              size={30}
-              style={{position: 'absolute', right: 20}}
-              onPress={handleClickIcon}
-            />
           </View>
           <View
             style={{
@@ -246,7 +243,8 @@ function TourDetailPage(props) {
             <IconMa name="calendar-month" color="rgb(254,46,100)" size={24} />
             <Text style={[style.text, {marginLeft: 5}]}>Ngày đi:</Text>
             <Text style={[style.date, {marginLeft: 10}]}>
-              {tourDetail.dateStart} - {tourDetail.time}N{tourDetail.time - 1}Đ
+              {tourDetail.dateStart} - {tourDetail.totalDay}N
+              {tourDetail.totalDay - 1}Đ
             </Text>
           </View>
           <View style={{flexDirection: 'row'}}>
@@ -255,21 +253,45 @@ function TourDetailPage(props) {
               color="rgb(254,46,100)"
               size={24}
             />
-            <Text style={[style.text, {marginLeft: 5}]}>Phương tiện:</Text>
+            <Text style={[style.text, {marginLeft: 5}]}>
+              Phương tiện xuất phát:
+            </Text>
             <Text style={[style.date, {marginLeft: 10}]}>
-              {/* {tourDetail.transport} */}Máy bay
+              {tourDetail.transportStart}
             </Text>
           </View>
           <View style={{flexDirection: 'row'}}>
-            <Icon name="place" size={24} color="rgb(254,46,100)" />
+            <IconAnt name="car" color="rgb(254,46,100)" size={24} />
+            <Text style={[style.text, {marginLeft: 5}]}>
+              Phương tiện di chuyển:
+            </Text>
+            <Text style={[style.date, {marginLeft: 10}]}>
+              {tourDetail.transportInTour}
+            </Text>
+          </View>
+          <View style={{flexDirection: 'row'}}>
+            <IconIon
+              name="location-outline"
+              size={24}
+              color="rgb(254,46,100)"
+            />
             <Text style={[style.text, {marginLeft: 5}]}>Nơi khởi hành:</Text>
             <Text style={[style.date, {marginLeft: 10}]}>
               {tourDetail.provinceName}
             </Text>
           </View>
+          <View style={{flexDirection: 'row'}}>
+            <IconAnt name="user" size={24} color="rgb(254,46,100)" />
+            <Text style={[style.text, {marginLeft: 5}]}>HDV:</Text>
+            <Text style={[style.date, {marginLeft: 10}]}>
+              {tourDetail.touGuideName !== null
+                ? tourDetail.touGuideName
+                : 'Đang cập nhật'}
+            </Text>
+          </View>
           <View>
             <View style={{flexDirection: 'row'}}>
-              <Icon name="place" size={24} color="rgb(254,46,100)" />
+              <IconMa name="fireplace-off" size={24} color="rgb(254,46,100)" />
               <Text style={[style.text, {marginLeft: 5}]}>Điểm đến:</Text>
             </View>
             <TagGroup
@@ -302,7 +324,7 @@ function TourDetailPage(props) {
                 fontFamily: 'Salsa-Regular',
                 marginLeft: 15,
               }}>
-              9
+              {tourDetail.quanity}
             </Text>
           </View>
           <Text style={style.date}>Nhúng địa chỉ google map</Text>
@@ -343,7 +365,7 @@ function TourDetailPage(props) {
               color: Colors.white,
               fontFamily: 'Salsa-Regular',
             }}>
-            {formatPrice(prince)}
+            {formatPrice(prince - promotion)}
           </Text>
         </View>
         <Text
