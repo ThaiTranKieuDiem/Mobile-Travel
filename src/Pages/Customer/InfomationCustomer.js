@@ -10,9 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Formik} from 'formik';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {
   Cli_UpdateCustomer,
   MB_Cli_GetInforCustumer,
@@ -21,6 +20,7 @@ import {unwrapResult} from '@reduxjs/toolkit';
 import Spinner from 'react-native-loading-spinner-overlay';
 import * as yup from 'yup';
 import LottieView from 'lottie-react-native';
+import {showMessage, hideMessage} from 'react-native-flash-message';
 
 function InfomationCustomer(props) {
   const {navigation, route} = props;
@@ -31,6 +31,8 @@ function InfomationCustomer(props) {
   const [customer, setCustomer] = useState({});
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
+  const [loadingPage, setLoadingPage] = useState(true);
+  //
 
   //
   const dispatch = useDispatch();
@@ -60,23 +62,24 @@ function InfomationCustomer(props) {
           if (value !== null) {
             setLoading(true);
             obj = JSON.parse(value);
-            console.log('obj.data.customerId', obj.data.customerId);
             dispatch(MB_Cli_GetInforCustumer({CustomerId: obj.data.customerId}))
               .then(unwrapResult)
               .then(payload => {
                 setCustomer(payload);
+                setLoadingPage(false);
               })
               .catch(error => {
-                console.log(error);
+                setLoadingPage(false);
+                console.log(error.status);
               });
           }
         })
         .catch(err => {
           console.log(err);
         });
-    }, 3000);
+    }, 1500);
   }
-  if (loading === false) {
+  if (loadingPage) {
     return (
       <View
         style={{
@@ -109,12 +112,27 @@ function InfomationCustomer(props) {
         .then(unwrapResult)
         .then(payload => {
           setLoadingEdit(false);
-          navigation.navigate('HomePage');
+          showMessage({
+            message: 'Thay đổi thông tin thành công',
+            type: 'success',
+          });
         })
         .catch(error => {
           setLoadingEdit(false);
-          console.log(error);
-          Alert.alert('Thất bại');
+          if (error.status === 401) {
+            AsyncStorage.clear();
+            showMessage({
+              message: 'Vui lòng đăng nhập lại',
+              type: 'warning',
+            });
+            navigation.navigate('HomePage');
+          } else {
+            showMessage({
+              message: error.message,
+              type: 'danger',
+              backgroundColor: '#D13B3B',
+            });
+          }
         });
     }, 2000);
   };

@@ -22,7 +22,6 @@ axiosClient.interceptors.request.use(async config => {
         //console.log(value);
         var obj = JSON.parse(value);
         token = obj.accessToken;
-        // console.log('token', token);
       }
     });
   }

@@ -11,12 +11,12 @@ const tourApi = {
 
   //lấy danh sách tất cả tour có phân trang
   Cli_GetTourListPagination: params => {
-    return axiosClient.get(`${url}/MB_Cli_GetTourListPagination`, {params});
+    return axiosClient.post(`${url}/Cli_GetDataTourSearch`, params);
   },
 
   //get tourdetail
   Cli_GetTourDescriptionById: params => {
-    return axiosClient.get(`${url}/MB_Cli_GetTourDescriptionById`, {params});
+    return axiosClient.get(`${url}/TourDetails`, {params});
   },
 };
 

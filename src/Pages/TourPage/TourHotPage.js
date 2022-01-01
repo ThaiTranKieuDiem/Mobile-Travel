@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Text,
   View,
@@ -8,15 +8,14 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Animated,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import dataTour from '../../consts/places';
-import TourItemList from '../../components/Tour/TourItemList';
 import circle_red from '../../asset/icons/iconBanner/circle-red.png';
 import circle from '../../asset/icons/iconBanner/circle.png';
 import hot_deals from '../../asset/icons/iconBanner/hot-deal.png';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {Cli_GetTourListPagination} from '../../Slice/SliceTour';
 import {unwrapResult} from '@reduxjs/toolkit';
 import TourFavorite from './../../components/Tour/TourFavorite';
@@ -29,21 +28,23 @@ function TourHotPage(props) {
   const [params, setParams] = useState({
     page: 1,
     limit: 10,
+    TravelTypeID: '8f64fb01-91fe-4850-a004-35cf26a1c1ef',
   });
 
-  ///state store
-  //const stateTour = useSelector(state => state.tour);
+  const scrolling = useRef(new Animated.Value(0)).current;
+  const translation = scrolling.interpolate({
+    inputRange: [100, 130],
+    outputRange: [-100, 0],
+    extrapolate: 'clamp',
+  });
 
   const dispatch = useDispatch();
-  //console.log(stateTour?.tourList);
   useEffect(() => {
-    console.log(isLoading);
     const fetchApi = () => {
       dispatch(Cli_GetTourListPagination(params))
         .then(unwrapResult)
         .then(payload => {
           setDataTour(prev => prev.concat(payload?.data));
-          console.log(payload.data);
           setLoading(false);
         })
         .catch(err => {
@@ -67,17 +68,18 @@ function TourHotPage(props) {
     });
     setLoading(true);
   };
-  return (
-    <SafeAreaView
-      style={{flex: 1, position: 'relative', backgroundColor: '#fff'}}>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0)"
-      />
+  const renderHeader = () => {
+    return (
       <View style={style.header}>
-        <Text style={style.title}>Tour nổi bật</Text>
-        <Text style={style.text}>Tour được đánh giá bởi người dùng</Text>
+        <Icon
+          name="arrow-back-ios"
+          size={28}
+          color={Colors.white}
+          onPress={() => navigation.navigate('HomePage')}
+          style={{position: 'absolute', top: 50, left: 20, zIndex: 3}}
+        />
+        <Text style={style.title}>Tour gia đình</Text>
+        <Text style={style.text}>Tất cả các tour tour gia đình</Text>
         <Image
           style={[style.image, {top: 25, right: -25}]}
           source={circle_red}
@@ -93,38 +95,96 @@ function TourHotPage(props) {
         />
         <Image style={[style.image, {top: 100, left: 10}]} source={hot_deals} />
       </View>
-      <View style={{marginTop: 16, flex: 3}}>
-        <FlatList
-          data={dataTour}
-          renderItem={({item}) => (
-            <View>
-              <TourFavorite tour={item} />
-            </View>
-          )}
-          keyExtractor={item => item.tourId}
-          contentContainerStyle={{marginHorizontal: 5}}
-          ListFooterComponent={renderFooter}
-          onEndReached={handleLoadMore}
-        />
-      </View>
-
-      <Icon
-        name="arrow-back-ios"
-        size={28}
-        color={Colors.white}
-        onPress={() => navigation.navigate('HomePage')}
-        style={{position: 'absolute', top: 50, left: 20}}
+    );
+  };
+  return (
+    <SafeAreaView
+      style={{flex: 1, position: 'relative', backgroundColor: '#fff'}}>
+      <StatusBar
+        translucent
+        barStyle="light-content"
+        backgroundColor="rgba(0,0,0,0)"
       />
+
+      <Animated.FlatList
+        data={dataTour}
+        renderItem={({item}) => (
+          <View>
+            <TourFavorite tour={item} />
+          </View>
+        )}
+        keyExtractor={item => item.tourId}
+        ListFooterComponent={renderFooter}
+        onEndReached={handleLoadMore}
+        ListHeaderComponent={renderHeader}
+        onScroll={Animated.event(
+          [
+            {
+              nativeEvent: {
+                contentOffset: {
+                  y: scrolling,
+                },
+              },
+            },
+          ],
+          {useNativeDriver: true},
+        )}
+      />
+
+      <Animated.View
+        style={{
+          transform: [{translateY: translation}],
+          position: 'absolute',
+          backgroundColor: '#fff',
+          height: 100,
+          top: 0,
+          borderBottomColor: '#f8f8f8',
+          borderBottomWidth: 2,
+          width: '100%',
+          padding: 20,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 4,
+          elevation: 5,
+        }}>
+        <StatusBar
+          translucent
+          barStyle="dark-content"
+          backgroundColor="rgba(0,0,0,0)"
+        />
+        <View style={{flexDirection: 'row', marginTop: 30}}>
+          <Icon
+            name="arrow-back-ios"
+            size={28}
+            color="#000"
+            onPress={navigation.goBack}
+          />
+          <Text
+            style={{
+              color: '#000',
+              fontSize: 23,
+              fontFamily: 'Montserrat-Medium',
+              marginLeft: 50,
+            }}>
+            Tour gia đình
+          </Text>
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }
 
 const style = StyleSheet.create({
   header: {
-    flex: 1,
     backgroundColor: '#FF4500',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: 180,
   },
   title: {
     color: '#ffe4b5',

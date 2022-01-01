@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Formik} from 'formik';
 import * as yup from 'yup';
@@ -7,6 +14,8 @@ import {unwrapResult} from '@reduxjs/toolkit';
 import {useDispatch} from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {Cli_ChangePassword} from '../../Slice/SliceCustomer';
+import {showMessage, hideMessage} from 'react-native-flash-message';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function ChangePasswordPage(props) {
   const {navigation, route} = props;
@@ -28,11 +37,7 @@ function ChangePasswordPage(props) {
   const dispatch = useDispatch();
 
   const validateSchema = yup.object().shape({
-    passwordOld: yup
-      .string()
-      .trim()
-      .required('* Password không được để trống')
-      .matches(params.password, 'Sai mật khẩu'),
+    passwordOld: yup.string().trim().required('* Password không được để trống'),
     password: yup
       .string()
       .trim()
@@ -45,24 +50,53 @@ function ChangePasswordPage(props) {
   ///
   const handleClickSubmit = values => {
     setLoading(true);
+    console.log(values);
     setTimeout(async () => {
-      dispatch(
-        Cli_ChangePassword(
-          Object.assign(values, {
-            customerId: params.customerId,
-          }),
-        ),
-      )
-        .then(unwrapResult)
-        .then(payload => {
-          setLoading(false);
-          navigation.navigate('HomePage');
-        })
-        .catch(error => {
-          console.log(error);
-          setLoading(false);
-          Alert.alert('Thất bại');
+      if (values.password !== values.repass) {
+        setLoading(false);
+        showMessage({
+          message: 'Mật khẩu không khớp',
+          type: 'danger',
+          backgroundColor: '#D13B3B',
         });
+      } else {
+        dispatch(
+          Cli_ChangePassword(
+            Object.assign(values, {
+              customerId: params.customerId,
+            }),
+          ),
+        )
+          .then(unwrapResult)
+          .then(payload => {
+            setLoading(false);
+            showMessage({
+              message: 'Cập nhật thành công',
+              description: 'Vui lòng đăng nhập lại',
+              type: 'success',
+            });
+            AsyncStorage.clear();
+            navigation.navigate('HomePage');
+          })
+          .catch(error => {
+            setLoading(false);
+            console.log(error);
+            if (error.status === 401) {
+              AsyncStorage.clear();
+              showMessage({
+                message: 'Vui lòng đăng nhập lại',
+                type: 'warning',
+              });
+              navigation.navigate('HomePage');
+            } else {
+              showMessage({
+                message: error.message,
+                type: 'danger',
+                backgroundColor: '#D13B3B',
+              });
+            }
+          });
+      }
     }, 3000);
   };
   return (

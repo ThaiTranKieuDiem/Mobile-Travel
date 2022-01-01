@@ -17,19 +17,35 @@ function TourItem(props) {
 
   const handelClickBox = tourId => {
     const params = {
-      TourId: tourId,
-      // tiếp tục prrams cho nay
+      tourID: tourId,
     };
-    console.log(params);
-    navigation.navigate('TourDetails', {tourId: params});
-    /*      */
+    navigation.navigate('TourDetails', {tourID: params});
   };
-  const textRating = rating => {
-    //let text = '';
-    if (rating >= 4) return (text = 'Tuyệt vời');
-    if (rating >= 3) return (text = 'Tốt');
-    if (rating >= 2) return (text = 'Tạm ổn');
-    else return (text = 'Trung bình');
+
+  const promotion = (tour.adultUnitPrice * tour.promotion) / 100;
+  const renderPromotion = () => {
+    var promotion = [];
+    if (tour.promotion !== null) {
+      promotion.push(
+        <Text style={styles.promotion} key={1}>
+          {tour.promotion}%
+        </Text>,
+      );
+    }
+    return (
+      <View
+        style={{
+          width: 70,
+          height: 70,
+          position: 'absolute',
+          backgroundColor: 'rgba(254,46,100,0.8)',
+          borderRadius: 50,
+          top: -25,
+          left: -10,
+        }}>
+        {promotion}
+      </View>
+    );
   };
 
   return (
@@ -40,36 +56,35 @@ function TourItem(props) {
         }}>
         <View style={styles.box}>
           <Image style={styles.image} source={{uri: `${tour.tourImg}`}} />
-          <Text style={styles.promotion}>-10%</Text>
-          <Text style={styles.prince}>{formatPrice(tour.adultUnitPrice)}</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              position: 'absolute',
-              top: 100,
-              left: 5,
-            }}>
-            <Text style={styles.rate}>{tour.rating}</Text>
-            <Text style={{color: '#fff', fontFamily: 'Poppins-Medium'}}>
-              {' '}
-              - {textRating(tour.rating)}
-            </Text>
-          </View>
+          {renderPromotion()}
+          <Text
+            style={[
+              styles.prince,
+              {
+                textDecorationLine: 'line-through',
+                color: '#fff',
+                top: 100,
+                left: 5,
+              },
+            ]}>
+            {formatPrice(tour.adultUnitPrice)}
+          </Text>
+          <Text style={styles.prince}>
+            {formatPrice(tour.adultUnitPrice - promotion)}
+          </Text>
+
           <View style={{lineHeight: 40}}>
             <View style={{flexDirection: 'row'}}>
-              <Text style={styles.text}>{tour.dateStart}</Text>
+              <Text style={styles.text}>{tour.dateStartFormat} </Text>
               <Text style={styles.text}>
-                {' '}
-                - {tour.time}N{tour.time - 1}Đ
+                {tour.totalDays > 1
+                  ? `- ${tour.totalDays}N${tour.totalDays - 1}Đ`
+                  : `- ${tour.totalDays} ngày`}
               </Text>
             </View>
             <Text numberOfLines={2} style={styles.name}>
               {tour.tourName}
             </Text>
-            <View style={styles.place}>
-              <Icon name="place" color="#000" size={20} />
-              <Text style={styles.location}>{tour.provinceName}</Text>
-            </View>
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -85,17 +100,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     position: 'relative',
     marginHorizontal: 10,
-    height: 320,
+    height: 280,
   },
   promotion: {
-    width: 70,
-    height: 70,
-    position: 'absolute',
-    backgroundColor: 'rgba(254,46,100,0.8)',
-    borderRadius: 50,
     textAlign: 'center',
-    top: -25,
-    left: -10,
     lineHeight: 80,
     color: '#fff',
     fontWeight: '700',

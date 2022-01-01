@@ -1,16 +1,28 @@
 import React, {useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, TextInput, View} from 'react-native';
+import {
+  Alert,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {Formik} from 'formik';
 import * as yup from 'yup';
 import {unwrapResult} from '@reduxjs/toolkit';
 import {useDispatch} from 'react-redux';
 import Spinner from 'react-native-loading-spinner-overlay';
-import {Cli_RegisterCustomer} from './../../Slice/SliceCustomer';
+import {
+  Cli_RegisterCustomer,
+  MB_RegisterPhoneNumber,
+} from './../../Slice/SliceCustomer';
+import {showMessage, hideMessage} from 'react-native-flash-message';
 
 function RegisterInfo(props) {
   const {navigation, route} = props;
   const {params} = route.params;
+  const {checkPhone} = route.params;
   const dispatch = useDispatch();
   const [register, setRegister] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -22,24 +34,66 @@ function RegisterInfo(props) {
     email: '',
     password: '',
     phoneNumber: params,
+    repass: '',
   };
 
   const handleSubmitFrom = values => {
     setLoading(true);
     setTimeout(async () => {
-      dispatch(Cli_RegisterCustomer(values))
-        .then(unwrapResult)
-        .then(payload => {
-          console.log(payload);
-          setRegister(true);
+      if (checkPhone === false) {
+        if (values.password !== values.repass) {
           setLoading(false);
-          navigation.navigate('LoginPage');
-        })
-        .catch(err => {
+          showMessage({
+            message: 'Mật khẩu không khớp',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        } else {
+          dispatch(Cli_RegisterCustomer(values))
+            .then(unwrapResult)
+            .then(payload => {
+              setRegister(true);
+              setLoading(false);
+
+              navigation.navigate('LoginPage');
+            })
+            .catch(err => {
+              setLoading(false);
+              setRegister(false);
+              showMessage({
+                message: err.message,
+                type: 'danger',
+                backgroundColor: '#D13B3B',
+              });
+            });
+        }
+      } else {
+        if (values.password !== values.repass) {
           setLoading(false);
-          setRegister(false);
-          Alert.alert(err.message);
-        });
+          showMessage({
+            message: 'Mật khẩu không khớp',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        } else {
+          dispatch(MB_RegisterPhoneNumber(values))
+            .then(unwrapResult)
+            .then(payload => {
+              setRegister(true);
+              setLoading(false);
+              navigation.navigate('LoginPage');
+            })
+            .catch(err => {
+              setLoading(false);
+              setRegister(false);
+              showMessage({
+                message: err.message,
+                type: 'danger',
+                backgroundColor: '#D13B3B',
+              });
+            });
+        }
+      }
     }, 1500);
   };
 

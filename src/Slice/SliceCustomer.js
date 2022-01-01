@@ -34,6 +34,22 @@ export const Cli_RegisterCustomer = createAsyncThunk(
   },
 );
 
+export const MB_RegisterPhoneNumber = createAsyncThunk(
+  'api/Customer/MB_RegisterPhoneNumber',
+  async (params, thunkApi) => {
+    try {
+      const response = await customerApi.MB_RegisterPhoneNumber(params);
+      return response;
+    } catch (error) {
+      return thunkApi.rejectWithValue({
+        error: error.message,
+        status: error.response.status,
+        message: error.response.data,
+      });
+    }
+  },
+);
+
 export const Cli_CheckPhoneCustomer = createAsyncThunk(
   'api/Customer/MB_Cli_CheckPhoneCustomer',
   async (params, thunkApi) => {
@@ -103,6 +119,7 @@ const customerSlice = createSlice({
   initialState: {
     dataCustomer: {},
     loading: 'idle',
+    loadingInfo: 'idle',
     error: '',
   },
   extraReducers: builder => {
@@ -155,13 +172,13 @@ const customerSlice = createSlice({
     });
     //edit
     builder.addCase(Cli_UpdateCustomer.pending, state => {
-      state.loading = 'loading';
+      state.loadingInfo = 'loading';
     });
     builder.addCase(Cli_UpdateCustomer.fulfilled, (state, {payload}) => {
-      state.loading = 'loaded';
+      state.loadingInfo = 'loaded';
     });
     builder.addCase(Cli_UpdateCustomer.rejected, (state, action) => {
-      state.loading = 'error';
+      state.loadingInfo = 'error';
       state.error = action.error.message;
     });
 
@@ -173,6 +190,18 @@ const customerSlice = createSlice({
       state.loading = 'loaded';
     });
     builder.addCase(Cli_ChangePassword.rejected, (state, action) => {
+      state.loading = 'error';
+      state.error = action.error.message;
+    });
+
+    ///
+    builder.addCase(MB_RegisterPhoneNumber.pending, state => {
+      state.loading = 'loading';
+    });
+    builder.addCase(MB_RegisterPhoneNumber.fulfilled, (state, {payload}) => {
+      state.loading = 'loaded';
+    });
+    builder.addCase(MB_RegisterPhoneNumber.rejected, (state, action) => {
       state.loading = 'error';
       state.error = action.error.message;
     });

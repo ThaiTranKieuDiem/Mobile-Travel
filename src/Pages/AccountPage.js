@@ -1,22 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Text,
-  View,
-  SafeAreaView,
-  StyleSheet,
-  StatusBar,
-  ScrollView,
-  ActivityIndicator,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
-import IconIon from 'react-native-vector-icons/Ionicons';
-import IconFont5 from 'react-native-vector-icons/FontAwesome5';
-import IconAnt from 'react-native-vector-icons/AntDesign';
+import {View} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Spinner from 'react-native-loading-spinner-overlay';
 import LottieView from 'lottie-react-native';
 import CustomerAccount from './Customer/CustomerAccount';
 import CustomerNoLogin from './Customer/CustomerNoLogin';
+import {useIsFocused} from '@react-navigation/native';
 
 function Account(props) {
   const {navigation, route} = props;
@@ -24,23 +13,35 @@ function Account(props) {
   const [logout, setLogout] = useState(false);
   const [loadingLogin, setLoadingLogin] = useState(false);
   const [checkAlreadyLogin, setCheckLoin] = useState(false);
+  const [name, setName] = useState('');
 
+  const isFocused = useIsFocused();
 
-  setTimeout(async () => {
-    setLoadingLogin(true);
-    await AsyncStorage.getItem('accessTokenCustomer')
-      .then(value => {
-        if (value !== null) {
-          setCheckLoin(true);
-        } else {
-          setCheckLoin(false);
-        }
-      })
-      .catch(err => {
-        console.log(err);
-        setCheckLoin(false);
-      });
-  }, 3000);
+  useEffect(() => {
+    const fetchApi = () => {
+      setTimeout(() => {
+        AsyncStorage.getItem('accessTokenCustomer')
+          .then(value => {
+            if (value !== null) {
+              const obj = JSON.parse(value);
+              setName(obj.data.customerName);
+              setCheckLoin(true);
+              setLoadingLogin(true);
+              //setName()
+            } else {
+              setCheckLoin(false);
+              setLoadingLogin(true);
+            }
+          })
+          .catch(err => {
+            console.log(err);
+            setCheckLoin(false);
+            setLoadingLogin(true);
+          });
+      }, 1000);
+    };
+    fetchApi();
+  }, [isFocused]);
 
   if (loadingLogin === false) {
     return (
@@ -59,7 +60,7 @@ function Account(props) {
       </View>
     );
   }
-  const handleClickLogout = async () => {
+  const handleClickLogout = () => {
     setLoading(true);
     setTimeout(() => {
       try {
@@ -85,6 +86,10 @@ function Account(props) {
   const handleClickRegister = () => {
     navigation.navigate('RegisterPage');
   };
+  const handleClickBookedCancel = () => {
+    navigation.navigate('BookedCancelPage');
+  };
+  ///
   if (checkAlreadyLogin) {
     return (
       <View style={{flex: 1}}>
@@ -104,6 +109,8 @@ function Account(props) {
         <CustomerAccount
           onClickLogout={handleClickLogout}
           onClickInfo={handleClickInfo}
+          onClickTourBookedCancel={handleClickBookedCancel}
+          name={name}
         />
       </View>
     );

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -14,10 +14,7 @@ import TourItemList from '../components/Tour/TourItemList';
 import TravelTypeList from '../components/TravelType/TravelTypeList';
 import logo from '../asset/logo/logo-03.png';
 import DestionationList from './../components/Destination/DestionationList';
-import {
-  Cli_GetTourListPagination,
-  Cli_GetTourTourIsSuggest,
-} from './../Slice/SliceTour';
+import {Cli_GetTourTourIsSuggest} from './../Slice/SliceTour';
 import {useSelector, useDispatch} from 'react-redux';
 import {unwrapResult} from '@reduxjs/toolkit';
 import Spinner from 'react-native-loading-spinner-overlay';
@@ -27,18 +24,34 @@ function HomePage(props) {
   ///state store
   const {navigation} = props;
   const stateTour = useSelector(state => state?.tour);
+  const [tourFamily, setTourFamily] = useState([]);
+  const [tourHot, setTourHot] = useState([]);
+  const [loading, setLoading] = useState(true);
   //console.log(stateTour.TourIsSuggest);
   ///
   const dispatch = useDispatch();
 
   //const dataTour
-  ///get tour de xuat
+  ///get tour de xuat tin noi khong?
   useEffect(() => {
     const fetchApi = () => {
       dispatch(Cli_GetTourTourIsSuggest())
         .then(unwrapResult)
         .then(payload => {
-          //console.log(payload);
+          setTourHot(payload);
+          dispatch(
+            Cli_GetTourTourIsSuggest({
+              tourFamily: '8f64fb01-91fe-4850-a004-35cf26a1c1ef',
+            }),
+          )
+            .then(unwrapResult)
+            .then(payload => {
+              setTourFamily(payload);
+              setLoading(false);
+            })
+            .catch(err => {
+              console.log(err);
+            });
         })
         .catch(err => {
           console.log(err);
@@ -46,7 +59,6 @@ function HomePage(props) {
     };
     fetchApi();
   }, []);
-
   const handleClickLoadTour = () => {
     navigation.navigate('TourPage');
   };
@@ -54,7 +66,7 @@ function HomePage(props) {
   return (
     <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
       <Spinner
-        visible={stateTour.loading === 'loaded' ? false : true}
+        visible={loading}
         textContent=""
         textStyle={{color: '#FFF'}}
         animation="fade"
@@ -98,21 +110,20 @@ function HomePage(props) {
       </View>
       {/**End HeaderSearch */}
       <ScrollView showsVerticalScrollIndicator={false} style={{flex: 1}}>
-        <TravelTypeList />
         <Banner style={{flex: 1}} />
         <View style={{flex: 1}}>
           <TourItemList
             horizontal={true}
-            dataTour={stateTour?.TourIsSuggest}
+            dataTour={tourHot}
             title="Tin nổi không?"
             description="Giá sốc chỉ có trên Mytour"
             onPresBtn={handleClickLoadTour}
           />
           <TourItemList
             horizontal={true}
-            dataTour={stateTour?.TourIsSuggest}
-            title="Tour nổi bật"
-            description="Tour nổi bật bởi khách hàng"
+            dataTour={tourFamily}
+            title="Tour gia đình"
+            description="Tour gia đình cho khách hàng"
             onPresBtn={handleClickLoadTour}
           />
           <DestionationList />

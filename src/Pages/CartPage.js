@@ -1,69 +1,115 @@
-import React from 'react';
-import {
-  FlatList,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import dataTour from '../consts/places';
-import TourFavorite from '../components/Tour/TourFavorite';
+import React, {useEffect, useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import CartNoLogin from './cart/CartNoLogin';
+import CartLogin from './cart/CartLogin';
+import {View} from 'react-native';
+import {MB_GetBookedByCustomer} from './../Slice/SliceBookingTour';
+import {useDispatch, useSelector} from 'react-redux';
+import {unwrapResult} from '@reduxjs/toolkit';
+import LottieView from 'lottie-react-native';
+import {useIsFocused} from '@react-navigation/native';
 
 function CartPage(props) {
   const {navigation} = props;
-  return (
-    <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0)"
-      />
-      <View style={style.header}>
-        <View
-          style={{
-            alignItems: 'center',
-            width: '100%',
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 23,
-              fontFamily: 'Montserrat-Medium',
-            }}>
-            Giỏ hàng
-          </Text>
-        </View>
-      </View>
-      {/* <FlatList
-        data={dataTour}
-        renderItem={({item}) => (
-          <View>
-            <TourFavorite
-              tour={item}
-              onClickBox={() => navigation.navigate('TourDetails')}
-            />
-          </View>
-        )}
-        keyExtractor={item => item.tourId}
-        contentContainerStyle={{marginHorizontal: 5}}
-      /> */}
-    </SafeAreaView>
-  );
-}
+  const [checkAlreadyLogin, setCheckLoin] = useState(false);
+  const [loadingLogin, setLoadingLogin] = useState(false);
+  const [user, setUser] = useState('');
+  const [checkTotal, setCheckTotal] = useState(false);
+  const [data, setData] = useState([]);
+  //
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
 
-const style = StyleSheet.create({
-  header: {
-    backgroundColor: '#87CEFA',
-    padding: 20,
-    justifyContent: 'flex-start',
-    width: '100%',
-    alignItems: 'flex-end',
-    height: 100,
-    flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#f8f8f8',
-  },
-});
+  useEffect(() => {
+    setLoadingLogin(false);
+    const fetchApi = () => {
+      setData([]);
+      setTimeout(() => {
+        AsyncStorage.getItem('accessTokenCustomer')
+          .then(value => {
+            if (value !== null) {
+              const obj = JSON.parse(value);
+              setCheckLoin(true);
+              setUser(obj.data.customerName);
+              const params = {
+                customerId: obj.data.customerId,
+                isDelete: true,
+              };
+              dispatch(MB_GetBookedByCustomer(params))
+                .then(unwrapResult)
+                .then(payload => {
+                  setLoadingLogin(true);
+                  setData(payload);
+                  console.log(params);
+                  console.log(payload);
+                })
+                .catch(error => {
+                  console.log(error.message);
+                  setLoadingLogin(true);
+                  setCheckLoin(false);
+                });
+            } else {
+              setLoadingLogin(true);
+              setCheckLoin(false);
+              setCheckTotal(false);
+            }
+          })
+          .catch(err => {
+            setLoadingLogin(true);
+            setCheckLoin(false);
+            setCheckLoin(false);
+            console.log(err);
+          });
+      }, 1000);
+    };
+    fetchApi();
+  }, [isFocused]);
+
+  if (loadingLogin === false) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#fff',
+        }}>
+        <LottieView
+          source={require('../asset/animation/84272-loading-colour.json')}
+          autoPlay
+          loop
+        />
+      </View>
+    );
+  }
+
+  const handleClickLogin = () => {
+    navigation.navigate('LoginPage');
+  };
+  const handleClickTour = id => {
+    navigation.navigate('InforMationTicket', {pID: id});
+  };
+
+  if (checkAlreadyLogin) {
+    return (
+      <View style={{flex: 1}}>
+        <CartLogin
+          data={data}
+          user={user}
+          checkTotal={checkTotal}
+          onClick={id => {
+            handleClickTour(id);
+          }}
+        />
+      </View>
+    );
+  } else {
+    return (
+      <View style={{flex: 1}}>
+        <CartNoLogin onClickNavigation={handleClickLogin} />
+      </View>
+    );
+  }
+}
 
 export default CartPage;
