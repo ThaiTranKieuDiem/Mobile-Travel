@@ -1,15 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {
-  SafeAreaView,
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-} from 'react-native';
+import {SafeAreaView, View, TextInput, StyleSheet} from 'react-native';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 import {Formik} from 'formik';
 import FilterPage from './FilterPage';
+import {showMessage, hideMessage} from 'react-native-flash-message';
 
 function SearchHome(props) {
   const {navigation} = props;
@@ -20,10 +14,17 @@ function SearchHome(props) {
     touristAttrName: '',
   };
   const handleSearch = values => {
-    navigation.navigate('TouristAttractionPage', {
-      params: values,
-      name: values.touristAttrName,
-    });
+    if (values.touristAttrName === '') {
+      showMessage({
+        message: 'Chưa nhập từ khóa',
+        type: 'warning',
+      });
+    } else {
+      navigation.navigate('TouristAttractionPage', {
+        params: values,
+        name: values.touristAttrName,
+      });
+    }
   };
 
   return (

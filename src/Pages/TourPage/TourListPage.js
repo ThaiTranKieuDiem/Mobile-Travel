@@ -9,13 +9,14 @@ import {
   FlatList,
   ActivityIndicator,
   Animated,
+  TouchableOpacity,
 } from 'react-native';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import circle_red from '../../asset/icons/iconBanner/circle-red.png';
 import circle from '../../asset/icons/iconBanner/circle.png';
 import hot_deals from '../../asset/icons/iconBanner/hot-deal.png';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {Cli_GetTourListPagination} from '../../Slice/SliceTour';
 import {unwrapResult} from '@reduxjs/toolkit';
 import TourFavorite from './../../components/Tour/TourFavorite';
@@ -32,7 +33,7 @@ function TourListPage(props) {
 
   const scrolling = useRef(new Animated.Value(0)).current;
   const translation = scrolling.interpolate({
-    inputRange: [100, 130],
+    inputRange: [0, 130],
     outputRange: [-100, 0],
     extrapolate: 'clamp',
   });
@@ -46,6 +47,7 @@ function TourListPage(props) {
         .then(payload => {
           setDataTour(prev => prev.concat(payload?.data));
           setLoading(false);
+          console.log(params);
         })
         .catch(err => {
           console.log(err);
@@ -121,13 +123,13 @@ function TourListPage(props) {
         ListFooterComponent={renderFooter}
         onEndReached={handleLoadMore}
         ListHeaderComponent={renderHeader}
-        scrollEventThrottle={16}
         onScroll={Animated.event(
           [
             {
               nativeEvent: {
                 contentOffset: {
                   y: scrolling,
+                  //y: iconArrowUp,
                 },
               },
             },
@@ -135,6 +137,7 @@ function TourListPage(props) {
           {useNativeDriver: true},
         )}
       />
+
       <Animated.View
         style={{
           transform: [{translateY: translation}],

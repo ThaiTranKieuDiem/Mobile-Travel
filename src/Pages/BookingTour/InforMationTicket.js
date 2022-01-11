@@ -6,6 +6,7 @@ import {
   Text,
   StyleSheet,
   StatusBar,
+  Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import IconIon from 'react-native-vector-icons/Ionicons';
@@ -20,7 +21,6 @@ import {
 } from 'react-native-image-header-scroll-view';
 import {formatPrice} from '../../utils/FormatNumber';
 import {MB_DeleteTourBooked} from './../../Slice/SliceBookingTour';
-import {Alert} from 'react-native';
 import Spinner from 'react-native-loading-spinner-overlay';
 import {showMessage, hideMessage} from 'react-native-flash-message';
 
@@ -31,6 +31,7 @@ function InforMationTicket(props) {
   const [booked, setBooked] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingClick, setLoadingClick] = useState(false);
+  const [address, setAddress] = useState('');
 
   const dispatch = useDispatch();
 
@@ -43,8 +44,9 @@ function InforMationTicket(props) {
         dispatch(Cli_GetTourBooked(params))
           .then(unwrapResult)
           .then(payload => {
-            setBooked(payload);
-            console.log(payload);
+            setBooked(payload?.data);
+            setAddress(payload?.address);
+            console.log(payload?.data);
             setLoading(false);
           })
           .catch(err => {
@@ -138,7 +140,12 @@ function InforMationTicket(props) {
         .then(unwrapResult)
         .then(payload => {
           setLoadingClick(false);
-          navigation.navigate('BookedCancelPage');
+          showMessage({
+            message: 'Hủy tour thành công',
+            type: 'success',
+            backgroundColor: '#D13B3B',
+          });
+          navigation.navigate('HomePage');
         })
         .catch(err => {
           setLoadingClick(false);
@@ -151,6 +158,20 @@ function InforMationTicket(props) {
     }, 1500);
   };
   ///
+  const handleClickAgain = () => {
+    const params = {
+      tourID: booked.tourId,
+    };
+    if (booked.dateStart < new Date()) {
+      showMessage({
+        message: 'Xin lỗi quý khách tour này đã hết hạn',
+        type: 'danger',
+        backgroundColor: '#D13B3B',
+      });
+    }
+    navigation.navigate('TourDetails', {tourID: params});
+  };
+
   if (loading) {
     return (
       <View
@@ -276,9 +297,7 @@ function InforMationTicket(props) {
                 </View>
                 <View style={[style.flex, {justifyContent: 'flex-start'}]}>
                   <IconMa name="address" size={24} color="#87CEFA" />
-                  <Text style={[style.text, {marginLeft: 5}]}>
-                    {booked.address}
-                  </Text>
+                  <Text style={[style.text, {marginLeft: 5}]}>{address}</Text>
                 </View>
               </View>
             </View>
@@ -292,7 +311,17 @@ function InforMationTicket(props) {
                 }}>
                 Thông tin loại vé
               </Text>
-              <View style={style.box}>{numberPeople()}</View>
+              <View
+                style={[
+                  style.box,
+                  {flexDirection: 'row', justifyContent: 'space-between'},
+                ]}>
+                {numberPeople()}
+                <Image
+                  source={{uri: booked.qrCode}}
+                  style={{width: 100, height: 100}}
+                />
+              </View>
             </View>
             <View>
               <Text
@@ -354,9 +383,17 @@ function InforMationTicket(props) {
           </View>
           <View style={style.footer}>
             <View style={style.button}>
-              <Text style={style.btnText} onPress={handleClickDelete}>
-                Hủy Tour
-              </Text>
+              {((booked.tourStart > new Date() && booked.isDelete === null) ||
+                booked.isDelete === null) && (
+                <Text style={style.btnText} onPress={handleClickDelete}>
+                  Hủy Tour
+                </Text>
+              )}
+              {booked.isDelete === false && (
+                <Text style={style.btnText} onPress={handleClickAgain}>
+                  Đặt lại
+                </Text>
+              )}
               <Text
                 style={style.btnText}
                 onPress={() => navigation.navigate('HomePage')}>

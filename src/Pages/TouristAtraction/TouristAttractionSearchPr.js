@@ -3,6 +3,7 @@ import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Image,
   StatusBar,
   StyleSheet,
   Text,
@@ -15,17 +16,18 @@ import {Cli_GetTourListPagination} from '../../Slice/SliceTour';
 import TourFavorite from './../../components/Tour/TourFavorite';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 import LottieView from 'lottie-react-native';
+import notFound from '../../asset/icons/iconViewPage/no.png';
 
 function TouristAttractionSearchPr(props) {
   const {navigation, route} = props;
   //
   //
   const {search} = route.params;
-
+  ///
   ///
   const [isLoading, setIsLoading] = useState(true);
   const [loadingPage, setLoadingPage] = useState(true);
-
+  ///
   const [data, setData] = useState([]);
   const [filter, setFilter] = useState({
     DeparturePlaceFromName: search.params.DeparturePlaceFromName,
@@ -46,6 +48,8 @@ function TouristAttractionSearchPr(props) {
 
   useEffect(() => {
     const fetchApi = () => {
+      const stateOld=filter;
+
       dispatch(Cli_GetTourListPagination(filter))
         .then(unwrapResult)
         .then(payload => {
@@ -57,12 +61,12 @@ function TouristAttractionSearchPr(props) {
         })
         .catch(err => {
           console.log(err);
-          setLoading(false);
+          setIsLoading(false);
           setLoadingPage(false);
         });
     };
     fetchApi();
-  }, []);
+  }, [filter]);
 
   if (loadingPage) {
     return (
@@ -97,23 +101,40 @@ function TouristAttractionSearchPr(props) {
     });
     setIsLoading(true);
   };
+
+  const renderText = () => {
+    let text = '';
+    if (
+      filter.DeparturePlaceFromName !== '' &&
+      filter.DeparturePlaceToName != ''
+    ) {
+      return (text = `Danh sách tour khởi hành từ ${filter.DeparturePlaceFromName} đến ${filter.DeparturePlaceToName}`);
+    }
+    if (filter.DeparturePlaceFromName !== '') {
+      return (text = `Danh sách tour khởi hành từ ${filter.DeparturePlaceFromName}`);
+    }
+    if (filter.DeparturePlaceToName !== '') {
+      return (text = `Danh sách tour khởi hành đến ${filter.DeparturePlaceToName}`);
+    }
+    if (filter.DateStart !== '') {
+      return (text = `Danh sách tour khởi hành ngày ${filter.DateStart}`);
+    } else {
+      return (text = `Danh sách tour khởi hành từ ${filter.DeparturePlaceFromName} đến ${filter.DeparturePlaceToName} vào ngày  ${filter.DateStart}`);
+    }
+  };
+
   const renderHeader = () => {
     return (
-      <View>
+      <View style={{paddingHorizontal: 15}}>
         <View style={style.location}>
           <View style={style.flex}>
             <Text
-              style={[
-                style.text,
-                {
-                  color: '#FF4500',
-                  fontFamily: 'Pacifico-Regular',
-                  fontSize: 24,
-                },
-              ]}>
-              {filter.DeparturePlaceToName === ''
-                ? filter.DeparturePlaceFromName
-                : filter.DeparturePlaceToName}
+              style={{
+                color: '#191970',
+                fontFamily: 'Poppins-Medium',
+                fontSize: 18,
+              }}>
+              {renderText()}
             </Text>
           </View>
         </View>
@@ -123,6 +144,29 @@ function TouristAttractionSearchPr(props) {
       </View>
     );
   };
+
+  const emptyComponent = ({item}) => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          paddingHorizontal: 15,
+        }}>
+        <Image source={notFound} style={{width: 150, height: 150}} />
+        <Text
+          style={{
+            color: '#191970',
+            fontFamily: 'Poppins-Medium',
+            fontSize: 18,
+          }}>
+          Chúng tôi hiện tại chưa có chuyến tour nào cho hành trình này!
+        </Text>
+      </View>
+    );
+  };
+
   return (
     <View style={{backgroundColor: '#fff', paddingHorizontal: 10, flex: 1}}>
       <StatusBar
@@ -151,20 +195,22 @@ function TouristAttractionSearchPr(props) {
           <IconAnt name="search1" size={18} color="#000" />
         </View>
       </View>
-
-      <FlatList
-        data={data}
-        renderItem={({item, index}) => (
-          <View key={index}>
-            <TourFavorite tour={item} />
-          </View>
-        )}
-        keyExtractor={item => `${item.tourId}`}
-        contentContainerStyle={{marginHorizontal: 5}}
-        ListFooterComponent={renderFooter}
-        onEndReached={handleLoadMore}
-        ListHeaderComponent={renderHeader}
-      />
+      <View style={{flex: 1}}>
+        {renderHeader()}
+        <FlatList
+          data={data}
+          renderItem={({item, index}) => (
+            <View key={index}>
+              <TourFavorite tour={item} />
+            </View>
+          )}
+          keyExtractor={item => `${item.tourId}`}
+          contentContainerStyle={{marginHorizontal: 5}}
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={emptyComponent}
+          onEndReached={handleLoadMore}
+        />
+      </View>
     </View>
   );
 }

@@ -16,9 +16,12 @@ import InfomationCustomer from './../Pages/Customer/InfomationCustomer';
 import ChangePasswordPage from './../Pages/Customer/ChangePasswordPage';
 import PaymentMethodPage from '../Pages/BookingTour/PaymentmethodPage';
 import PaymenTicketPage from './../Pages/BookingTour/PaymentTicketPage';
-import InforMationTicket from './../Pages/BookingTour/InformationTicket';
 import FilterPage from './../Pages/Search/FilterPage';
 import BookedCancel from './../Pages/cart/BookedCancel';
+import InforMationTicket from './../Pages/BookingTour/InforMationTicket';
+import NotificationPage from '../Pages/Notifications/NotificationPage';
+import NewsDetails from '../Pages/News/NewsDetails';
+import NewsByKindPage from './../Pages/News/NewsByKindPage';
 
 const Stack = createNativeStackNavigator();
 function StackNavigation() {
@@ -136,6 +139,21 @@ function StackNavigation() {
         options={{headerShown: false}}
         name="BookedCancelPage"
         component={BookedCancel}
+      />
+      <Stack.Screen
+        options={{title: 'Thông báo'}}
+        name="NotificationPage"
+        component={NotificationPage}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="NewsDetails"
+        component={NewsDetails}
+      />
+      <Stack.Screen
+        options={{headerShown: false}}
+        name="NewsByKindPage"
+        component={NewsByKindPage}
       />
     </Stack.Navigator>
   );

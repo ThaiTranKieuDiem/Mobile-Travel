@@ -5,17 +5,15 @@ import IconIon from 'react-native-vector-icons/Ionicons';
 import IconFont5 from 'react-native-vector-icons/FontAwesome5';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 
-
 function CustomerAccount(props) {
   const {
     onClickLogout,
     onClickInfo,
-    onClickTourBookedCancel,
     onClickSecurity,
     onClickMyTour,
-    name
+    name,
+    onClickNotification,
   } = props;
-  const [loading, setLoading] = useState(false);
 
   const handleClickLogout = async () => {
     if (onClickLogout) {
@@ -26,11 +24,6 @@ function CustomerAccount(props) {
     if (onClickInfo) onClickInfo();
   };
 
-  const handleClickBookedCancel = () => {
-    if (onClickTourBookedCancel) {
-      onClickTourBookedCancel();
-    }
-  };
 
   const handleClickSecurity = () => {
     if (onClickSecurity) {
@@ -41,6 +34,12 @@ function CustomerAccount(props) {
   const handleClickMyTour = () => {
     if (onClickMyTour) {
       onClickMyTour();
+    }
+  };
+
+  const handleClickNotifications = () => {
+    if (onClickNotification) {
+      onClickNotification();
     }
   };
 
@@ -91,25 +90,16 @@ function CustomerAccount(props) {
             </Text>
           </View>
           <View View style={style.flex}>
-            <Icon
-              name="heart"
+            <IconIon
+              name="notifications"
               size={23}
               color="#fff"
               style={[style.icon, {backgroundColor: '#E6E6FA'}]}
             />
-            <Text style={[style.text, {fontSize: 17}]}>Tour đã tham gia</Text>
-          </View>
-          <View style={style.flex}>
-            <IconFont5
-              name="tag"
-              size={23}
-              color="#fff"
-              style={[style.icon, {backgroundColor: '#FFC0CB'}]}
-            />
             <Text
               style={[style.text, {fontSize: 17}]}
-              onPress={handleClickBookedCancel}>
-              Tour đã hủy
+              onPress={handleClickNotifications}>
+              Thông báo
             </Text>
           </View>
         </View>

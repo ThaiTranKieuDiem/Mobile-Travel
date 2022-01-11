@@ -4,7 +4,7 @@ import CartNoLogin from './cart/CartNoLogin';
 import CartLogin from './cart/CartLogin';
 import {View} from 'react-native';
 import {MB_GetBookedByCustomer} from './../Slice/SliceBookingTour';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {unwrapResult} from '@reduxjs/toolkit';
 import LottieView from 'lottie-react-native';
 import {useIsFocused} from '@react-navigation/native';
@@ -13,15 +13,27 @@ function CartPage(props) {
   const {navigation} = props;
   const [checkAlreadyLogin, setCheckLoin] = useState(false);
   const [loadingLogin, setLoadingLogin] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [user, setUser] = useState('');
   const [checkTotal, setCheckTotal] = useState(false);
   const [data, setData] = useState([]);
+  const [params, setParams] = useState({
+    isDelete: true,
+    Page: 1,
+    limit: 10,
+  });
   //
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
 
   useEffect(() => {
     setLoadingLogin(false);
+    if (isFocused !== true) {
+      setParams({
+        ...params,
+        page: 1,
+      });
+    }
     const fetchApi = () => {
       setData([]);
       setTimeout(() => {
@@ -31,26 +43,27 @@ function CartPage(props) {
               const obj = JSON.parse(value);
               setCheckLoin(true);
               setUser(obj.data.customerName);
-              const params = {
-                customerId: obj.data.customerId,
-                isDelete: true,
-              };
-              dispatch(MB_GetBookedByCustomer(params))
+              dispatch(
+                MB_GetBookedByCustomer(
+                  Object.assign(params, {CustomerID: obj.data.customerId}),
+                ),
+              )
                 .then(unwrapResult)
                 .then(payload => {
                   setLoadingLogin(true);
-                  setData(payload);
-                  console.log(params);
-                  console.log(payload);
+                  setLoading(false);
+                  setData(prev => prev.concat(payload));
                 })
                 .catch(error => {
                   console.log(error.message);
                   setLoadingLogin(true);
+                  setLoading(false);
                   setCheckLoin(false);
                 });
             } else {
               setLoadingLogin(true);
               setCheckLoin(false);
+              setLoading(false);
               setCheckTotal(false);
             }
           })
@@ -90,6 +103,14 @@ function CartPage(props) {
     navigation.navigate('InforMationTicket', {pID: id});
   };
 
+  const handleLoadMore = () => {
+    setParams({
+      ...params,
+      page: params.page + 1,
+    });
+    setLoading(true);
+  };
+
   if (checkAlreadyLogin) {
     return (
       <View style={{flex: 1}}>
@@ -100,6 +121,8 @@ function CartPage(props) {
           onClick={id => {
             handleClickTour(id);
           }}
+          loadMore={handleLoadMore}
+          isLoading={isLoading}
         />
       </View>
     );

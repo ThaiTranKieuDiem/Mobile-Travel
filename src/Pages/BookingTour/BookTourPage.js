@@ -27,7 +27,6 @@ function BookTourPage(props) {
   const [countChildren, setCountChildren] = useState(0);
   const [countBaby, setCountBaby] = useState(0);
   const [countYoung, setCountYoung] = useState(0);
-  const [headerShow, setHeaderShow] = useState(false);
   const [totalCount, setTotalCount] = useState(
     params.travelTypeId === '8f64fb01-91fe-4850-a004-35cf26a1c1ef'
       ? params.groupNumber
@@ -55,6 +54,105 @@ function BookTourPage(props) {
     infant: countYoung,
   };
   //
+  const handelClickAddPeople = values => {
+    if (params.groupNumber > 0) {
+      showMessage({
+        message: `Số lượng vé tối đa là ${params.groupNumber} `,
+        type: 'danger',
+        backgroundColor: '#D13B3B',
+      });
+    } else {
+      if (totalCount > params.quanity - 1) {
+        showMessage({
+          message: 'Đã đủ số lượng người tham gia',
+          type: 'danger',
+          backgroundColor: '#D13B3B',
+        });
+      } else {
+        if (values === 'addAdult') {
+          setCountAdult(prevCount => prevCount + 1);
+          //setTotalCount(countAdult + 1 + countChildren + countBaby + countYoung);
+        }
+        if (values === 'addChildren') {
+          setCountChildren(prevCount => prevCount + 1);
+          //setTotalCount(countAdult + 1 + countChildren + countBaby + countYoung);
+        }
+        if (values === 'addBaby') {
+          setCountBaby(prevCount => prevCount + 1);
+          //setTotalCount(countAdult + 1 + countChildren + countBaby + countYoung);
+        }
+        if (values == 'addYoung') {
+          if (countYoung === 2) {
+            showMessage({
+              message: 'Số vé em bé không được lớn hơn 2',
+              type: 'danger',
+              backgroundColor: '#D13B3B',
+            });
+          } else {
+            setCountYoung(prevCount => prevCount + 1);
+          }
+          //setTotalCount(countAdult + 1 + countChildren + countBaby + countYoung);
+        }
+        setTotalCount(countAdult + 1 + countChildren + countBaby + countYoung);
+      }
+    }
+  };
+  //
+  const handelClickDeletePeople = values => {
+    if (params.groupNumber > 0) {
+      showMessage({
+        message: `Số lượng vé tối thiểu là ${params.groupNumber} `,
+        type: 'danger',
+        backgroundColor: '#D13B3B',
+      });
+    } else {
+      if (values === 'deleteAdult') {
+        if (countAdult === 1) {
+          showMessage({
+            message: 'Số vé người lớn tổi thiểu là 1',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        } else {
+          setCountAdult(prevCount => prevCount - 1);
+        }
+      }
+      if (values === 'deleteChildren') {
+        if (countChildren === 0) {
+          showMessage({
+            message: 'Số vé trẻ nhỏ không được là 0',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        } else {
+          setCountChildren(prevCount => prevCount - 1);
+        }
+      }
+      if (values === 'deleteBaby') {
+        if (countBaby === 0) {
+          showMessage({
+            message: 'Số vé trẻ em không được là 0',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        } else {
+          setCountBaby(prevCount => prevCount - 1);
+        }
+      }
+      if (values == 'deleteYoung') {
+        if (countYoung === 0) {
+          showMessage({
+            message: 'Số vé em bé không được là 0',
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
+        } else {
+          setCountYoung(prevCount => prevCount - 1);
+        }
+      }
+      setTotalCount(countAdult - 2 + countChildren + countBaby + countYoung);
+    }
+  };
 
   const adultUnitPrice = params.adultUnitPrice - promotion;
   const childrenUnitPrice =
@@ -387,6 +485,14 @@ const style = StyleSheet.create({
     height: 150,
     flexDirection: 'row',
     top: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
   boxDetails: {
     backgroundColor: '#fff',

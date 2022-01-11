@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import bell from '../../asset/icons/iconViewPage/bell.png';
-import NotificationDetails from './NotificationDetails';
+import NotificationDetails from '../../Pages/Notifications/NotificationDetails';
 import {useDispatch} from 'react-redux';
 import {Cli_PromotionDetails} from './../../Slice/SlicePromotion';
 import {unwrapResult} from '@reduxjs/toolkit';
@@ -26,7 +26,7 @@ function Notification(props) {
     rotateValueHolder.setValue(0);
     Animated.timing(rotateValueHolder, {
       toValue: 1,
-      duration: 10,
+      duration: 5,
       easing: Easing.linear,
       useNativeDriver: false,
     }).start(() => {

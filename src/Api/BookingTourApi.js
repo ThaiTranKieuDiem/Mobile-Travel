@@ -9,7 +9,7 @@ const bookingTourApi = {
     return axiosClient.get(`${url}/Adm_BookingTourDetails`, {params});
   },
   MB_GetBookedByCustomer: params => {
-    return axiosClient.get(`${url}/MB_GetBookedByCustomer`, {params});
+    return axiosClient.post(`${url}/MB_GetBookedByCustomer`, params);
   },
   Adm_SendEmailAfterBooking: params => {
     return axiosClient.get(`${url}/Adm_SendEmailAfterBooking`, {params});

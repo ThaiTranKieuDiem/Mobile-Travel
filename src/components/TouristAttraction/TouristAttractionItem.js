@@ -5,7 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 function TouristAttractionItem(props) {
   const {data} = props;
   const navigation = useNavigation();
-  const BaseUrlServer = 'http://192.168.1.81:8000/ImagesTouristAttractions/';
+  const BaseUrlServer = 'http://192.168.20.101:8000/ImagesTouristAttractions/';
 
   const handleClick = values => {
     const params = {

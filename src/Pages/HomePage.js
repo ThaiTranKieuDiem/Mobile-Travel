@@ -50,11 +50,19 @@ function HomePage(props) {
               setLoading(false);
             })
             .catch(err => {
-              console.log(err);
+              showMessage({
+                message: err,
+                type: 'danger',
+                backgroundColor: '#D13B3B',
+              });
             });
         })
         .catch(err => {
-          console.log(err);
+          showMessage({
+            message: err,
+            type: 'danger',
+            backgroundColor: '#D13B3B',
+          });
         });
     };
     fetchApi();

@@ -47,21 +47,21 @@ function TourFavorite(props) {
           {tour.promotion}%
         </Text>,
       );
+      return (
+        <View
+          style={{
+            width: 80,
+            height: 80,
+            position: 'absolute',
+            backgroundColor: 'rgba(254,46,100,0.8)',
+            borderRadius: 50,
+            top: -25,
+            left: -10,
+          }}>
+          {promotion}
+        </View>
+      );
     }
-    return (
-      <View
-        style={{
-          width: 100,
-          height: 100,
-          position: 'absolute',
-          backgroundColor: 'rgba(254,46,100,0.8)',
-          borderRadius: 50,
-          top: -25,
-          left: -10,
-        }}>
-        {promotion}
-      </View>
-    );
   };
 
   return (
@@ -119,10 +119,10 @@ const styles = StyleSheet.create({
   },
   promotion: {
     textAlign: 'center',
-    lineHeight: 100,
+    lineHeight: 80,
     color: '#fff',
     fontWeight: '700',
-    fontSize: 30,
+    fontSize: 20,
   },
   image: {
     width: '42%',

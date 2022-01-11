@@ -21,7 +21,7 @@ import Swiper from 'react-native-swiper';
 
 function TouristAtractionDetails(props) {
   const {navigation, route} = props;
-  const baseURL = 'http://192.168.1.81:8000/ImagesTouristAttractions/';
+  const baseURL = 'http://192.168.20.101:8000/ImagesTouristAttractions/';
   //
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +36,7 @@ function TouristAtractionDetails(props) {
       .then(unwrapResult)
       .then(payload => {
         setData(payload);
+        console.log(payload);
         setLoading(false);
         if (payload.imagesList === null) {
           setImageList([]);
@@ -128,7 +129,7 @@ function TouristAtractionDetails(props) {
                 <Icon
                   name="place"
                   size={28}
-                  color="#ffa500"
+                  color="#003d71"
                   style={{marginRight: 5}}
                 />
                 <Text style={style.textProvince}>{data.provinceName}</Text>
@@ -138,7 +139,11 @@ function TouristAtractionDetails(props) {
               <Text
                 style={[
                   style.textDescription,
-                  {fontFamily: 'Poppins-Medium', color: '#4682B4'},
+                  {
+                    fontFamily: 'Poppins-Medium',
+                    color: '#003d71',
+                    fontSize: 20,
+                  },
                 ]}>
                 Chi tiết địa điểm tham quan
               </Text>
@@ -161,15 +166,15 @@ const style = StyleSheet.create({
     color: '#000',
     fontFamily: 'Pacifico-Regular',
     fontSize: 30,
-    color: '#ffa500',
+    color: '#003d71',
   },
   textProvince: {
-    color: '#ffa500',
+    color: '#003d71',
     fontFamily: 'Pacifico-Regular',
     fontSize: 20,
   },
   textDescription: {
-    // color: '#000',
+    color: 'rgb(45,66,113)',
     fontFamily: 'Poppins-Light',
     fontSize: 18,
     lineHeight: 30,
