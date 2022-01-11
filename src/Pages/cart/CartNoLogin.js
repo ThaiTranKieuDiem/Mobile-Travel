@@ -13,27 +13,7 @@ function CartNoLogin(props) {
   };
   return (
     <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0)"
-      />
-      <View style={style.header}>
-        <View
-          style={{
-            alignItems: 'center',
-            width: '100%',
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 23,
-              fontFamily: 'Montserrat-Medium',
-            }}>
-            Đơn hàng đã đặt
-          </Text>
-        </View>
-      </View>
+      <StatusBar translucent barStyle="dark-content" backgroundColor="#fff" />
       <View
         style={{
           flex: 1,
@@ -75,8 +55,6 @@ const style = StyleSheet.create({
     alignItems: 'flex-end',
     height: 100,
     flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#f8f8f8',
   },
   textBtn: {
     marginTop: 10,

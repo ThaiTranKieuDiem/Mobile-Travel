@@ -5,7 +5,7 @@ import {
   StyleSheet,
   StatusBar,
   SafeAreaView,
-  TouchableWithoutFeedback,
+  ScrollView,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import IconMa from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,6 +24,8 @@ import {Cli_GetTourDescriptionById} from './../../Slice/SliceTour';
 import RenderHtml from 'react-native-render-html';
 import {useWindowDimensions} from 'react-native';
 import TagGroup from 'react-native-tag-group';
+import TravelTypeList from './../../components/TravelType/TravelTypeList';
+import {Modal} from 'react-native';
 
 function TourDetailPage(props) {
   const {navigation, route} = props;
@@ -31,30 +33,28 @@ function TourDetailPage(props) {
   //
   const [tourDetail, setTourDetail] = useState({});
   const [loading, setLoading] = useState(true);
-  const [clickIcon, setClickIon] = useState(false);
   const [scheduleArray, setScheduleArray] = useState([]);
   const [arrayTouristAttrName, setArrayTouristAttrName] = useState([]);
-
+  //
+  const [showModal, setShowModal] = useState(false);
   //
   const dispatch = useDispatch();
   //
   const {tourID} = route.params;
-
-  //console.log(tourId);
 
   useEffect(() => {
     dispatch(Cli_GetTourDescriptionById(tourID))
       .then(unwrapResult)
       .then(payload => {
         setLoading(false);
+        console.log(payload);
         setTourDetail(payload);
-
-        var finalArray = payload.tourDetails.map(function (obj) {
+        var finalArray = payload?.tourDetails.map(function (obj) {
           return obj.touristAttrName;
         });
         setArrayTouristAttrName(finalArray);
         const re = '^||||^';
-        let arrayObj = String(payload.schedule).split(re);
+        let arrayObj = String(payload?.schedule).split(re);
         arrayObj.pop();
         setScheduleArray([]);
         Array.from(arrayObj).map(item => {
@@ -69,6 +69,8 @@ function TourDetailPage(props) {
         console.log(err);
       });
   }, []);
+
+  //console.log(scheduleArray[0]['title']);
 
   const handleClickBook = () => {
     const params = {
@@ -88,11 +90,6 @@ function TourDetailPage(props) {
     navigation.navigate('Booking', {params: params});
   };
   ///
-
-  const handleClickIcon = async () => {
-    setClickIon(true);
-    console.log(finalArray);
-  };
 
   const promotion = (tourDetail.adultUnitPrice * tourDetail.promotion) / 100;
   const promotionBaby = (tourDetail.babyUnitPrice * tourDetail.promotion) / 100;
@@ -138,19 +135,66 @@ function TourDetailPage(props) {
 
   const source = {
     html: `
-      ${Array.from(scheduleArray).map(
-        (item, index) =>
-          `<li key=${index}>
-          <div > 
-            <h5 style="font-size:20px;color:rgb(254,46,100)">
-                ${item.title.trim()}
-            </h5>
-            <div>
-            ${item.schedule}
+        ${Array.from(scheduleArray).map(
+          (item, index) =>
+            ` <div  key=${index}>
+            <div> 
+              <h5  style="font-size: 20px; margin-bottom: 0px; margin-top: 20px; color: #003d71">
+                  ${item.title.trim()}
+              </h5>
+              <div style="line-height: 24px; font-size: 20px;">
+                ${String(item.schedule)
+                  .replace('<ul>', '')
+                  .replace('</ul>', '')}
+              </div>
             </div>
-          </div>
-        </li>`,
-      )}`,
+          </div>`,
+        )}`,
+  };
+
+  const renderSchedule = {
+    html: `
+      ${
+        scheduleArray.length > 0 &&
+        `
+          <li key=${1}>
+            <div> 
+              <h5 style="font-size: 20px; margin-bottom: 0px; margin-top: 20px; color: #003d71">
+                  ${scheduleArray[0]['title']} 
+              </h5>
+              <div 
+              style="
+              line-height: 24px; 
+              font-size: 20px';
+               >
+              ${String(scheduleArray[0]['schedule'])
+                .replace('<ul>', '')
+                .replace('</ul>', '')}
+              </div>
+            </div>
+          </li>`
+      }
+    `,
+  };
+
+  const conditionByTour = {
+    html: `<div style="font-size: 18px; line-height: 24px">
+    ${String(tourDetail.conditionByTour)}
+    </div>`,
+  };
+
+  const noteByMyTour = {
+    html: `
+    <div style="font-size: 18px; line-height: 24px">${String(
+      tourDetail.noteByMyTour,
+    )}</div>`,
+  };
+
+  const noteByTour = {
+    html: `
+    <div style="font-size: 18px; line-height: 24px">${String(
+      tourDetail.noteByTour,
+    )}</div>`,
   };
 
   const renderRating = rate => {
@@ -161,8 +205,16 @@ function TourDetailPage(props) {
     return <View style={{flexDirection: 'row'}}>{rating}</View>;
   };
 
+  const handleClickOpen = () => {
+    setShowModal(true);
+  };
+
+  const handleClickClose = () => {
+    setShowModal(false);
+  };
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: Colors.white}}>
+    <SafeAreaView style={{flex: 1}}>
       <StatusBar
         translucent
         barStyle="light-content"
@@ -188,172 +240,240 @@ function TourDetailPage(props) {
           </View>
         )}>
         <TriggeringView style={style.detailsContainer}>
-          <View style={{flexDirection: 'row', marginTop: 10}}>
-            <Text
-              style={{
-                fontSize: 27,
-                color: '#4682B4',
-                fontFamily: 'Pacifico-Regular',
-                marginBottom: 5,
-                textShadowColor: 'rgba(70, 130, 180, 0.8)',
-                textShadowOffset: {width: -1, height: 1},
-                textShadowRadius: 10,
-              }}
-              numberOfLines={3}>
-              {tourDetail.tourName}
-            </Text>
-          </View>
-          <View>
-            <Text
-              style={{
-                color: '#ffa500',
-                fontSize: 22,
-                fontFamily: 'Salsa-Regular',
-                textDecorationLine: 'line-through',
-              }}>
-              {formatPrice(prince)}{' '}
-              {princeBaby === 0 ? '' : `- ${formatPrice(princeBaby)}`}
-            </Text>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              marginBottom: 15,
-            }}>
-            <Text
-              style={{
-                color: '#ffa500',
-                fontSize: 22,
-                fontFamily: 'Salsa-Regular',
-              }}>
-              {formatPrice(prince - promotion)}{' '}
-              {princeBaby === 0
-                ? ''
-                : `- ${formatPrice(princeBaby - promotionBaby)}`}
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              lineHeight: 30,
-            }}>
-            <IconMa name="calendar-month" color="rgb(254,46,100)" size={24} />
-            <Text style={[style.text, {marginLeft: 5}]}>Ngày đi:</Text>
-            <Text style={[style.date, {marginLeft: 10}]}>
-              {tourDetail.dateStart} - {tourDetail.totalDay}N
-              {tourDetail.totalDay - 1}Đ
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <IconIon
-              name="paper-plane-outline"
-              color="rgb(254,46,100)"
-              size={24}
-            />
-            <Text style={[style.text, {marginLeft: 5}]}>
-              Phương tiện xuất phát:
-            </Text>
-            <Text style={[style.date, {marginLeft: 10}]}>
-              {tourDetail.transportStart}
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <IconAnt name="car" color="rgb(254,46,100)" size={24} />
-            <Text style={[style.text, {marginLeft: 5}]}>
-              Phương tiện di chuyển:
-            </Text>
-            <Text style={[style.date, {marginLeft: 10}]}>
-              {tourDetail.transportInTour}
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <IconIon
-              name="location-outline"
-              size={24}
-              color="rgb(254,46,100)"
-            />
-            <Text style={[style.text, {marginLeft: 5}]}>Nơi khởi hành:</Text>
-            <Text style={[style.date, {marginLeft: 10}]}>
-              {tourDetail.provinceName}
-            </Text>
-          </View>
-          <View style={{flexDirection: 'row'}}>
-            <IconAnt name="user" size={24} color="rgb(254,46,100)" />
-            <Text style={[style.text, {marginLeft: 5}]}>HDV:</Text>
-            <Text style={[style.date, {marginLeft: 10}]}>
-              {tourDetail.touGuideName !== null
-                ? tourDetail.touGuideName
-                : 'Đang cập nhật'}
-            </Text>
-          </View>
-          <View>
-            <View style={{flexDirection: 'row'}}>
-              <IconMa name="fireplace-off" size={24} color="rgb(254,46,100)" />
-              <Text style={[style.text, {marginLeft: 5}]}>Điểm đến:</Text>
+          <View style={style.box}>
+            <View style={{flexDirection: 'row', marginTop: 10}}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  color: '#003d71',
+                  fontFamily: 'Pacifico-Regular',
+                  marginBottom: 5,
+                  textShadowColor: 'rgba(0, 61, 113, 0.8)',
+                  textShadowOffset: {width: -1, height: 1},
+                  textShadowRadius: 10,
+                }}
+                numberOfLines={3}>
+                {tourDetail.tourName}
+              </Text>
             </View>
-            <TagGroup
-              //ref={ref => (tagGroup = ref)}
-              source={arrayTouristAttrName}
-              tagStyle={{
-                height: 35,
-                borderColor: '#fff',
-                backgroundColor: '#f8f8f8',
-              }}
-              singleChoiceMode={true}
-              textStyle={{fontSize: 15, fontFamily: 'Poppins-Medium'}}
-              //TouchableOpacity={handleClickProvince}
-              onSelectedTagChange={handleClickProvince}
-            />
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              lineHeight: 30,
-            }}>
-            <IconIon name="bed-outline" size={24} color="rgb(254,46,100)" />
-            <Text style={[style.text, {marginLeft: 5}]}>Số chỗ còn nhận:</Text>
-            <Text
-              style={{
-                color: '#f00',
-                fontSize: 20,
-                fontFamily: 'Salsa-Regular',
-                marginLeft: 15,
-              }}>
-              {tourDetail.quanity}
-            </Text>
-          </View>
-          <Text style={style.date}>Nhúng địa chỉ google map</Text>
-          <View style={{marginTop: 20}}>
-            <Text
-              style={[
-                style.date,
-                {fontSize: 21, color: '#4682B4', fontFamily: 'Salsa-Regular'},
-              ]}>
-              Chi tiêt về địa điểm du lịch
-            </Text>
             <View>
-              <Text style={[style.text, {lineHeight: 30}]}>
-                {tourDetail.description}
+              <Text
+                style={{
+                  color: '#ffa500',
+                  fontSize: 22,
+                  fontFamily: 'Salsa-Regular',
+                  textDecorationLine: 'line-through',
+                }}>
+                {formatPrice(prince)}{' '}
+                {princeBaby === 0 ? '' : `- ${formatPrice(princeBaby)}`}
+              </Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: 15,
+              }}>
+              <Text
+                style={{
+                  color: '#ffa500',
+                  fontSize: 22,
+                  fontFamily: 'Salsa-Regular',
+                }}>
+                {formatPrice(prince - promotion)}{' '}
+                {princeBaby === 0
+                  ? ''
+                  : `- ${formatPrice(princeBaby - promotionBaby)}`}
               </Text>
             </View>
           </View>
-          <View style={{marginTop: 20}}>
-            <Text
-              style={[
-                style.date,
-                {fontSize: 21, color: '#ffa500', fontFamily: 'Salsa-Regular'},
-              ]}>
-              Lịch trình Tour
-            </Text>
-            <View>
-              <RenderHtml source={source} contentWidth={width} />
-              {/* <Text style={style.text}>{tourDetail.schedule}</Text> */}
+          <View style={[style.box, {paddingHorizontal: 10}]}>
+            <TravelTypeList />
+          </View>
+          <View style={style.box}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                lineHeight: 30,
+              }}>
+              <IconMa name="calendar-month" color="rgb(254,46,100)" size={24} />
+              <Text style={[style.text, {marginLeft: 5}]}>Ngày đi:</Text>
+              <Text style={[style.date, {marginLeft: 10}]}>
+                {tourDetail.dateStart} - {tourDetail.totalDay}N
+                {tourDetail.totalDay - 1}Đ
+              </Text>
             </View>
+            <View style={{flexDirection: 'row'}}>
+              <IconIon
+                name="paper-plane-outline"
+                color="rgb(254,46,100)"
+                size={24}
+              />
+              <Text style={[style.text, {marginLeft: 5}]}>
+                Phương tiện xuất phát:
+              </Text>
+              <Text style={[style.date, {marginLeft: 10}]}>
+                {tourDetail.transportStart}
+              </Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <IconAnt name="car" color="rgb(254,46,100)" size={24} />
+              <Text style={[style.text, {marginLeft: 5}]}>
+                Phương tiện di chuyển:
+              </Text>
+              <Text style={[style.date, {marginLeft: 10}]}>
+                {tourDetail.transportInTour}
+              </Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <IconIon
+                name="location-outline"
+                size={24}
+                color="rgb(254,46,100)"
+              />
+              <Text style={[style.text, {marginLeft: 5}]}>Nơi khởi hành:</Text>
+              <Text style={[style.date, {marginLeft: 10}]}>
+                {tourDetail.provinceName}
+              </Text>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+              <IconAnt name="user" size={24} color="rgb(254,46,100)" />
+              <Text style={[style.text, {marginLeft: 5}]}>HDV:</Text>
+              <Text style={[style.date, {marginLeft: 10}]}>
+                {tourDetail.touGuideName !== null
+                  ? tourDetail.touGuideName
+                  : 'Đang cập nhật'}
+              </Text>
+            </View>
+            <View>
+              <View style={{flexDirection: 'row'}}>
+                <IconMa
+                  name="fireplace-off"
+                  size={24}
+                  color="rgb(254,46,100)"
+                />
+                <Text style={[style.text, {marginLeft: 5}]}>Điểm đến:</Text>
+              </View>
+              <TagGroup
+                //ref={ref => (tagGroup = ref)}
+                source={arrayTouristAttrName}
+                tagStyle={{
+                  height: 35,
+                  borderColor: '#FFF',
+                  backgroundColor: '#f8f8f8',
+                }}
+                singleChoiceMode={true}
+                textStyle={{fontSize: 15, fontFamily: 'Poppins-Medium'}}
+                onSelectedTagChange={handleClickProvince}
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                lineHeight: 30,
+              }}>
+              <IconIon name="bed-outline" size={24} color="rgb(254,46,100)" />
+              <Text style={[style.text, {marginLeft: 5}]}>
+                Số chỗ còn nhận:
+              </Text>
+              <Text
+                style={{
+                  color: '#f00',
+                  fontSize: 20,
+                  fontFamily: 'Salsa-Regular',
+                  marginLeft: 15,
+                }}>
+                {tourDetail.quanity}
+              </Text>
+            </View>
+          </View>
+          <View style={style.box}>
+            <View style={{marginTop: 20}}>
+              <Text
+                style={[
+                  style.date,
+                  {
+                    fontSize: 24,
+                    color: '#003d71',
+                    fontFamily: 'Salsa-Regular',
+                    marginBottom: 15,
+                  },
+                ]}>
+                Chi tiết về địa điểm du lịch
+              </Text>
+              <View>
+                <Text style={[style.text, {lineHeight: 30}]}>
+                  {tourDetail.description}
+                </Text>
+              </View>
+            </View>
+          </View>
+          <View style={style.box}>
+            <View
+              style={{
+                marginTop: 20,
+              }}>
+              <Text
+                style={[
+                  style.date,
+                  {fontSize: 24, color: '#ffa500', fontFamily: 'Salsa-Regular'},
+                ]}>
+                Lịch trình Tour
+              </Text>
+              <View>
+                <RenderHtml source={renderSchedule} contentWidth={width} />
+                <Text
+                  style={{
+                    color: '#1E90FF',
+                    textDecorationLine: 'underline',
+                    textDecorationColor: '#1E90FF',
+                    fontSize: 16,
+                    fontFamily: 'Poppins-Light',
+                  }}
+                  onPress={handleClickOpen}>
+                  Xem thêm...
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={style.box}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: 'Poppins-Medium',
+                color: '#003d71',
+              }}>
+              Điều kiện khi nhận khách
+            </Text>
+            <RenderHtml source={conditionByTour} contentWidth={width} />
+          </View>
+
+          <View style={style.box}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: 'Poppins-Medium',
+                color: '#003d71',
+              }}>
+              Lưu ý "(nếu có)"
+            </Text>
+            <RenderHtml source={noteByMyTour} contentWidth={width} />
+          </View>
+
+          <View style={style.box}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: 'Poppins-Medium',
+                color: '#003d71',
+              }}>
+              Chi chú cho tour này
+            </Text>
+            <RenderHtml source={noteByTour} contentWidth={width} />
           </View>
         </TriggeringView>
       </ImageHeaderScrollView>
@@ -384,6 +504,35 @@ function TourDetailPage(props) {
           Đặt Ngay
         </Text>
       </View>
+      <View>
+        <Modal animationType="slide" transparent={true} visible={showModal}>
+          <StatusBar
+            translucent
+            barStyle="light-content"
+            backgroundColor="rgba(0,0,0,0)"
+          />
+          <View style={style.modalView}>
+            <View style={style.contentModal}>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <IconAnt name="close" size={24} onPress={handleClickClose} />
+                <Text
+                  style={{
+                    fontFamily: 'Salsa-Regular',
+                    fontSize: 20,
+                    color: '#ffa500',
+                    textAlign: 'center',
+                    width: '85%',
+                  }}>
+                  Lịch trình tour
+                </Text>
+              </View>
+              <ScrollView>
+                <RenderHtml source={source} contentWidth={width} />
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
+      </View>
     </SafeAreaView>
   );
 }
@@ -392,10 +541,8 @@ const style = StyleSheet.create({
   detailsContainer: {
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    backgroundColor: Colors.white,
     position: 'relative',
+    backgroundColor: '#F5F5F5',
   },
   imageDetails: {
     padding: 20,
@@ -428,13 +575,50 @@ const style = StyleSheet.create({
     fontFamily: 'Poppins-Light',
     fontSize: 15,
     lineHeight: 30,
+    color: ' rgb(45,66,113)',
   },
   date: {
     fontFamily: 'Poppins-Medium',
     fontSize: 17,
+    color: '#003d71',
   },
-  comment: {
-    flexDirection: 'row',
+  box: {
+    backgroundColor: '#FFF',
+    width: '100%',
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    marginBottom: 10,
+  },
+  modalView: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flex: 1,
+    height: '100%',
+  },
+  contentModal: {
+    height: 550,
+    width: '100%',
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    padding: 20,
+    position: 'absolute',
+    bottom: 0,
   },
 });
 

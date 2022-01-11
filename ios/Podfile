@@ -16,6 +16,8 @@ target 'tourManagerMobile' do
 
   pod 'react-native-sms', :path => '../node_modules/react-native-sms'
 
+  pod 'react-native-fbsdk', :path => '../node_modules/react-native-fbsdk'
+
   target 'tourManagerMobileTests' do
     inherit! :complete
     # Pods for testing

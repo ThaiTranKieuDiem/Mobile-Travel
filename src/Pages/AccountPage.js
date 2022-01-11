@@ -8,7 +8,7 @@ import CustomerNoLogin from './Customer/CustomerNoLogin';
 import {useIsFocused} from '@react-navigation/native';
 
 function Account(props) {
-  const {navigation, route} = props;
+  const {navigation} = props;
   const [loading, setLoading] = useState(false);
   const [logout, setLogout] = useState(false);
   const [loadingLogin, setLoadingLogin] = useState(false);
@@ -27,7 +27,6 @@ function Account(props) {
               setName(obj.data.customerName);
               setCheckLoin(true);
               setLoadingLogin(true);
-              //setName()
             } else {
               setCheckLoin(false);
               setLoadingLogin(true);
@@ -86,8 +85,8 @@ function Account(props) {
   const handleClickRegister = () => {
     navigation.navigate('RegisterPage');
   };
-  const handleClickBookedCancel = () => {
-    navigation.navigate('BookedCancelPage');
+  const handleClickNotification = () => {
+    navigation.navigate('NotificationPage');
   };
   ///
   if (checkAlreadyLogin) {
@@ -109,7 +108,7 @@ function Account(props) {
         <CustomerAccount
           onClickLogout={handleClickLogout}
           onClickInfo={handleClickInfo}
-          onClickTourBookedCancel={handleClickBookedCancel}
+          onClickNotification={handleClickNotification}
           name={name}
         />
       </View>
@@ -119,6 +118,7 @@ function Account(props) {
     <CustomerNoLogin
       onClickLogin={handleClickLogin}
       onClickRegister={handleClickRegister}
+      onClickNotification={handleClickNotification}
     />
   );
 }

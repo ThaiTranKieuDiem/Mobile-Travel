@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const {REACT_APP_TOUR_MANAGER_API_KEY} = process.env;
 console.log(REACT_APP_TOUR_MANAGER_API_KEY);
 const axiosClient = axios.create({
-  baseURL: 'http://192.168.1.81:8000',
+  baseURL: 'http://192.168.20.101:8000',
   headers: {
     'Content-Type': 'application/json',
   },

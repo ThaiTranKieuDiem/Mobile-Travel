@@ -79,7 +79,7 @@ function TourHotPage(props) {
           style={{position: 'absolute', top: 50, left: 20, zIndex: 3}}
         />
         <Text style={style.title}>Tour gia đình</Text>
-        <Text style={style.text}>Tất cả các tour tour gia đình</Text>
+        <Text style={style.text}>Tất cả các tour gia đình</Text>
         <Image
           style={[style.image, {top: 25, right: -25}]}
           source={circle_red}

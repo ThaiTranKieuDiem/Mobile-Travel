@@ -24,22 +24,36 @@ function NotificationDetails(props) {
       <Modal animationType="fade" transparent={true} visible={modalVisible}>
         <View style={style.modalView}>
           <View style={{flexDirection: 'row'}}>
-            <IconAnt name="close" size={24} onPress={handleClickClose} />
+            <IconAnt name="close" size={24} onPress={handleClickClose} color="#003d71" />
           </View>
-          <Text style={[style.text, {fontSize: 20, textAlign: 'center'}]}>
+          <Text
+            style={[
+              style.text,
+              {fontSize: 20, textAlign: 'center', fontFamily: 'Poppins-Medium'},
+            ]}>
             {promotionDetails.promotionName}
           </Text>
           <View style={{flexDirection: 'row'}}>
             <Text style={style.text}>Ngày bắt đầu: </Text>
-            <Text style={style.text}>{dateStart}</Text>
+            <Text style={[style.text, {fontFamily: 'Poppins-Medium'}]}>
+              {dateStart}
+            </Text>
           </View>
           <View style={{flexDirection: 'row'}}>
             <Text style={style.text}>Ngày kết thúc: </Text>
-            <Text style={style.text}>{dateEnd}</Text>
+            <Text style={[style.text, {fontFamily: 'Poppins-Medium'}]}>
+              {dateEnd}
+            </Text>
           </View>
           <View style={{flexDirection: 'row'}}>
             <Text style={style.text}>Giảm giá: </Text>
-            <Text style={style.text}>{promotionDetails.discount}%</Text>
+            <Text
+              style={[
+                style.text,
+                {fontFamily: 'Poppins-Medium', color: 'rgb(254,46,100)'},
+              ]}>
+              {promotionDetails.discount}%
+            </Text>
           </View>
           <View style={{flex: 1, alignItems: 'flex-end'}}>
             <Image source={announcement} />
@@ -55,7 +69,7 @@ const style = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 20,
     padding: 35,
-    shadowColor: '#000',
+    shadowColor: '#003d71',
     shadowOffset: {
       width: 0,
       height: 2,
@@ -67,7 +81,7 @@ const style = StyleSheet.create({
     marginHorizontal: 20,
   },
   text: {
-    color: '#000',
+    color: '#003d71',
     fontSize: 17,
     fontFamily: 'Poppins-Light',
   },

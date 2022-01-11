@@ -6,6 +6,7 @@ import bookingTourReducer from '../Slice/SliceBookingTour';
 import enumerateReducer from '../Slice/SliceEnumerate';
 import provinceReducer from '../Slice/SliceProvince';
 import promotionReducer from '../Slice/SlicePromotion';
+import newsReducer from './../Slice/SliceNews';
 
 export default configureStore({
   reducer: {
@@ -16,5 +17,6 @@ export default configureStore({
     enumerate: enumerateReducer,
     province: provinceReducer,
     promotion: promotionReducer,
+    news: newsReducer,
   },
 });

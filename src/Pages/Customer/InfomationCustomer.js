@@ -32,6 +32,7 @@ function InfomationCustomer(props) {
   const [loading, setLoading] = useState(false);
   const [loadingEdit, setLoadingEdit] = useState(false);
   const [loadingPage, setLoadingPage] = useState(true);
+  const [address, setAddress] = useState('');
   //
 
   //
@@ -65,12 +66,12 @@ function InfomationCustomer(props) {
             dispatch(MB_Cli_GetInforCustumer({CustomerId: obj.data.customerId}))
               .then(unwrapResult)
               .then(payload => {
-                setCustomer(payload);
+                setCustomer(payload?.data);
+                setAddress(payload?.address);
                 setLoadingPage(false);
               })
               .catch(error => {
                 setLoadingPage(false);
-                console.log(error.status);
               });
           }
         })
@@ -246,7 +247,7 @@ function InfomationCustomer(props) {
                   value={
                     checkAddress === true
                       ? values.address
-                      : (values.address = customer.address)
+                      : (values.address = address)
                   }
                 />
               </View>

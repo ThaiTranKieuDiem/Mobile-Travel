@@ -9,58 +9,72 @@ import {
   Image,
 } from 'react-native';
 import TourCart from './../../components/Tour/TourCart';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {unwrapResult} from '@reduxjs/toolkit';
 import LottieView from 'lottie-react-native';
 import {useIsFocused} from '@react-navigation/native';
 import {MB_GetBookedByCustomer} from './../../Slice/SliceBookingTour';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import box from '../../asset/icons/iconViewPage/open-box.png';
+import CartNoLogin from './CartNoLogin';
 
 function BookedCancel(props) {
   const {navigation} = props;
   ///
-  const [checkAlreadyLogin, setCheckLoin] = useState(false);
   const [loadingLogin, setLoadingLogin] = useState(false);
-  const [user, setUser] = useState('');
+  const [checkAlreadyLogin, setCheckLoin] = useState(false);
   const [data, setData] = useState('');
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
+  const [isLoading, setLoading] = useState(true);
+  const [params, setParams] = useState({
+    isDelete: false,
+    Page: 1,
+    limit: 10,
+  });
+
   ///
   useEffect(() => {
     setLoadingLogin(false);
+    if (isFocused !== true) {
+      setParams({
+        ...params,
+        page: 1,
+      });
+    }
     const fetchApi = () => {
       setTimeout(() => {
         AsyncStorage.getItem('accessTokenCustomer')
           .then(value => {
             if (value !== null) {
               const obj = JSON.parse(value);
-              const params = {
-                customerId: obj.data.customerId,
-                isDelete: false,
-              };
-              setUser(obj.data.customerName);
-              dispatch(MB_GetBookedByCustomer(params))
+              setCheckLoin(true);
+              dispatch(
+                MB_GetBookedByCustomer(
+                  Object.assign(params, {CustomerID: obj.data.customerId}),
+                ),
+              )
                 .then(unwrapResult)
                 .then(payload => {
-                  setCheckLoin(true);
                   setLoadingLogin(true);
                   setData(payload);
+                  setLoading(false);
                 })
                 .catch(error => {
                   console.log(error.message);
                   setLoadingLogin(true);
-                  setCheckLoin(false);
+                  setLoading(false);
                 });
             } else {
               setLoadingLogin(true);
+              setLoading(false);
               setCheckLoin(false);
             }
           })
           .catch(err => {
             setLoadingLogin(true);
             setCheckLoin(false);
+            setLoading(false);
             console.log(err);
           });
       }, 1000);
@@ -69,7 +83,11 @@ function BookedCancel(props) {
   }, [isFocused]);
 
   const handleClick = id => {
-    console.log(id);
+    navigation.navigate('InforMationTicket', {pID: id});
+  };
+
+  const handleClickLogin = () => {
+    navigation.navigate('LoginPage');
   };
 
   if (loadingLogin === false) {
@@ -89,65 +107,43 @@ function BookedCancel(props) {
       </View>
     );
   }
-  if (data === null || data.length < 1) {
+  const ListEmptyComponent = () => {
     return (
-      <View style={{backgroundColor: '#f8f8f8', flex: 1}}>
-        <StatusBar
-          translucent
-          barStyle="light-content"
-          backgroundColor="rgba(0,0,0,0)"
-        />
-        <View style={style.header}>
-          <Icon
-            name="arrow-back-ios"
-            size={28}
-            color="#fff"
-            onPress={navigation.goBack}
-          />
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 23,
-              fontFamily: 'Montserrat-Medium',
-              width: '90%',
-              textAlign: 'center',
-            }}>
-            Tour đã hủy
-          </Text>
-        </View>
-        <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-          <Image source={box} style={{width: 200, height: 200}} />
-          <Text style={style.text}>Bạn vẫn chưa hủy tour nào</Text>
-        </View>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: '#fff',
+          paddingHorizontal: 15,
+          height: 630,
+          width: '100%',
+        }}>
+        <Image source={box} style={{width: 200, height: 200}} />
+        <Text style={style.text}>Bạn vẫn chưa hủy tour nào</Text>
       </View>
     );
-  }
-  return (
-    <SafeAreaView style={{backgroundColor: '#f8f8f8', flex: 1}}>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0)"
-      />
-      <View style={style.header}>
-        <Icon
-          name="arrow-back-ios"
-          size={28}
-          color="#fff"
-          onPress={navigation.goBack}
-        />
-        <Text
-          style={{
-            color: '#fff',
-            fontSize: 23,
-            fontFamily: 'Montserrat-Medium',
-            width: '90%',
-            textAlign: 'center',
-          }}>
-          Tour đã hủy
-        </Text>
+  };
+
+  const handleLoadMore = () => {
+    setParams({
+      ...params,
+      page: params.page + 1,
+    });
+    setLoading(true);
+  };
+
+  const renderFooter = () => {
+    return isLoading && data.length > 2 ? (
+      <View>
+        <ActivityIndicator />
       </View>
-      <View style={style.content}>
+    ) : null;
+  };
+
+  if (checkAlreadyLogin) {
+    return (
+      <SafeAreaView style={{backgroundColor: '#f8f8f8', flex: 1}}>
+        <StatusBar translucent barStyle="dark-content" backgroundColor="#fff" />
         <FlatList
           data={data}
           renderItem={({item}) => (
@@ -161,9 +157,17 @@ function BookedCancel(props) {
             </View>
           )}
           keyExtractor={item => item.bookingTourId}
+          ListEmptyComponent={ListEmptyComponent}
+          ListFooterComponent={renderFooter}
+          onEndReached={handleLoadMore}
         />
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    );
+  }
+  return (
+    <View style={{flex: 1}}>
+      <CartNoLogin onClickNavigation={handleClickLogin} />
+    </View>
   );
 }
 const style = StyleSheet.create({
@@ -177,9 +181,6 @@ const style = StyleSheet.create({
     borderBottomColor: '#f8f8f8',
     alignItems: 'center',
     paddingHorizontal: 20,
-  },
-  content: {
-    flex: 1,
   },
   text: {
     fontFamily: 'Poppins-Light',

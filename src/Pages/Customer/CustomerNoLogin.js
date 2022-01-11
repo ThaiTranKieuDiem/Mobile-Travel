@@ -13,7 +13,13 @@ import IconFont5 from 'react-native-vector-icons/FontAwesome5';
 import {useNavigation} from '@react-navigation/native';
 
 function CustomerNoLogin(props) {
-  const {onClickLogin, onClickRegister, onClickSecurity, onClickMyTour} = props;
+  const {
+    onClickLogin,
+    onClickRegister,
+    onClickSecurity,
+    onClickMyTour,
+    onClickNotification,
+  } = props;
   const navigation = useNavigation();
 
   const handleClickLogin = () => {
@@ -33,6 +39,12 @@ function CustomerNoLogin(props) {
       onClickSecurity();
     }
   };
+  const handleClickNotifications = () => {
+    if (onClickNotification) {
+      onClickNotification();
+    }
+  };
+
   return (
     <SafeAreaView style={{backgroundColor: '#fff', flex: 1}}>
       <StatusBar
@@ -117,7 +129,11 @@ function CustomerNoLogin(props) {
                   },
                 ]}
               />
-              <Text style={[style.text, {fontSize: 17}]}>Thông báo</Text>
+              <Text
+                style={[style.text, {fontSize: 17}]}
+                onPress={handleClickNotifications}>
+                Thông báo
+              </Text>
             </View>
             <View
               style={{

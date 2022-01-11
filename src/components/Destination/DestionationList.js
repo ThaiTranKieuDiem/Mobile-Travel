@@ -5,9 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 
 function DestionationList(props) {
   const navigation = useNavigation();
-  const handleClickPlace = values => {
-    console.log(values);
-  };
+
   return (
     <View style={{paddingHorizontal: 15, flex: 1}}>
       <Text style={style.text}>Điểm đến yêu thích</Text>
@@ -32,7 +30,7 @@ function DestionationList(props) {
             uri: 'http://hanoimoi.com.vn/Uploads/images/tuandiep/2020/08/05/Thanh-Pho-Ho-Chi-Minh-Quyet.jpg',
           }}
           place="Thành phố Hồ Chí Minh"
-          name="Thành phố Hồ Chí Minh"
+          province="Thành phố Hồ Chí Minh"
         />
         <DestinationItem
           style={{
@@ -47,7 +45,7 @@ function DestionationList(props) {
             uri: 'https://kenh14cdn.com/2017/vinalo-1468654230m4wgx0ur-1483343002915.jpeg',
           }}
           place="TP Đà Lạt"
-          name="Tỉnh Lâm Đồng"
+          province="Tỉnh Lâm Đồng"
         />
         <DestinationItem
           height={140}
@@ -63,7 +61,7 @@ function DestionationList(props) {
             uri: 'https://thegioibantin.com/wp-content/uploads/2021/03/Nguo%CC%82%CC%80n-go%CC%82%CC%81c-te%CC%82n-go%CC%A3i-Ba%CC%80-Ri%CC%A3a-%E2%80%93-Vu%CC%83ng-Ta%CC%80u-Co%CC%81-tha%CC%A3%CC%82t-di%CC%A3a-danh-Ba%CC%80-Ri%CC%A3a-du%CC%9Bo%CC%9B%CC%A3c-la%CC%82%CC%81y-tu%CC%9B%CC%80-te%CC%82n-mo%CC%A3%CC%82t-ngu%CC%9Bo%CC%9B%CC%80i-phu%CC%A3-nu%CC%9B%CC%83-te%CC%82n-Nguye%CC%82%CC%83n-Thi%CC%A3-Ri%CC%A3a-hay-kho%CC%82ng4.jpeg',
           }}
           place="TP Vũng Tàu"
-          name="Tỉnh Bà Rịa - Vũng Tàu"
+          province="Tỉnh Bà Rịa - Vũng Tàu"
         />
         <DestinationItem
           height={140}
@@ -79,7 +77,7 @@ function DestionationList(props) {
             uri: 'https://kinhtenongthon.vn/media/news/be8eca3856293b0591f6240af2b62091/40692162_9381807_image_a_23_1616-1616460198504.jpg',
           }}
           place="TP Đà Nẵng"
-          name="Thành phố Đà Nẵng"
+          province="Thành phố Đà Nẵng"
         />
         <DestinationItem
           style={{
@@ -94,7 +92,7 @@ function DestionationList(props) {
             uri: 'https://timchuyenbay.com/assets/uploads/2021/03/ho-guom-ha-noi.jpg',
           }}
           place="Hà Nội"
-          name="Thành phố Hà Nội"
+          province="Thành phố Hà Nội"
         />
         <DestinationItem
           style={{
@@ -109,7 +107,7 @@ function DestionationList(props) {
             uri: 'https://chuyennhuong.truongphucland.vn/wp-content/uploads/2019/11/shophouse-sun-group-dia-trung-hai-phu-quoc.jpg',
           }}
           place="Phú Quốc"
-          name="Tỉnh Kiên Giang"
+          province="Tỉnh Kiên Giang"
         />
       </View>
     </View>

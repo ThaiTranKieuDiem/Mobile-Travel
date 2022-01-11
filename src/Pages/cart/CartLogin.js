@@ -1,18 +1,18 @@
 import React, {useEffect} from 'react';
 import {
   FlatList,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   View,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import TourCart from './../../components/Tour/TourCart';
 import cart from '../../asset/icons/iconTravelItem/shopping-cart.png';
 
 function CartLogin(props) {
-  const {onClick, data, user} = props;
+  const {onClick, data, user, loadMore, isLoading} = props;
 
   const handleClick = id => {
     if (onClick) {
@@ -20,87 +20,61 @@ function CartLogin(props) {
     }
   };
 
-  if (data === null || data.length < 1) {
+  const emptyComponent = () => {
     return (
-      <SafeAreaView style={{backgroundColor: '#f8f8f8', flex: 1}}>
-        <StatusBar
-          translucent
-          barStyle="light-content"
-          backgroundColor="rgba(0,0,0,0)"
-        />
-        <View style={style.header}>
-          <View
-            style={{
-              alignItems: 'center',
-              width: '100%',
-            }}>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: 23,
-                fontFamily: 'Montserrat-Medium',
-              }}>
-              Đơn hàng đã đặt
-            </Text>
-          </View>
-        </View>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            color: '#fff',
-            paddingHorizontal: 15,
-          }}>
-          <Image source={cart} style={{width: 250, height: 250}} />
-          <Text style={style.text}>{user} ơi! Bạn vẫn chưa có tour nào!</Text>
-          <Text style={style.text}>
-            Hãy nhanh tay đặt ngay để trải nghiệm những dịch vụ của Mytour nhé{' '}
-          </Text>
-        </View>
-      </SafeAreaView>
+      <View
+        style={{
+          justifyContent: 'center',
+          alignItems: 'center',
+          color: '#fff',
+          paddingHorizontal: 15,
+          height: 630,
+          width: '100%',
+        }}>
+        <Image source={cart} style={{width: 250, height: 250}} />
+        <Text style={style.text}>{user} ơi! Bạn vẫn chưa có tour nào!</Text>
+        <Text style={style.text}>
+          Hãy nhanh tay đặt ngay để trải nghiệm những dịch vụ của Mytour nhé{' '}
+        </Text>
+      </View>
     );
-  }
+  };
+
+  const handleLoadMore = () => {
+    if (loadMore) {
+      loadMore();
+    }
+  };
+
+  const renderFooter = () => {
+    return isLoading && data.length > 2 ? (
+      <View>
+        <ActivityIndicator />
+      </View>
+    ) : null;
+  };
+
   return (
-    <SafeAreaView style={{backgroundColor: '#f8f8f8', flex: 1}}>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="rgba(0,0,0,0)"
+    <View style={{backgroundColor: '#f8f8f8', flex: 1}}>
+      <StatusBar translucent barStyle="dark-content" backgroundColor="#fff" />
+      <FlatList
+        data={data}
+        renderItem={({item}) => (
+          <View>
+            <TourCart
+              booked={item}
+              onClick={id => {
+                handleClick(item.bookingTourId);
+              }}
+            />
+          </View>
+        )}
+        keyExtractor={item => item.bookingTourId}
+        ListEmptyComponent={emptyComponent}
+        ListFooterComponent={renderFooter}
+        onEndReached={handleLoadMore}
       />
-      <View style={style.header}>
-        <View
-          style={{
-            alignItems: 'center',
-            width: '100%',
-          }}>
-          <Text
-            style={{
-              color: '#fff',
-              fontSize: 23,
-              fontFamily: 'Montserrat-Medium',
-            }}>
-            Tour đã đặt
-          </Text>
-        </View>
-      </View>
-      <View style={style.content}>
-        <FlatList
-          data={data}
-          renderItem={({item}) => (
-            <View>
-              <TourCart
-                booked={item}
-                onClick={id => {
-                  handleClick(item.bookingTourId);
-                }}
-              />
-            </View>
-          )}
-          keyExtractor={item => item.bookingTourId}
-        />
-      </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -113,8 +87,6 @@ const style = StyleSheet.create({
     alignItems: 'flex-end',
     height: 100,
     flexDirection: 'row',
-    borderBottomWidth: 2,
-    borderBottomColor: '#f8f8f8',
   },
   content: {
     flex: 1,

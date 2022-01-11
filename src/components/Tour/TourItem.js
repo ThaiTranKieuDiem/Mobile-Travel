@@ -31,21 +31,21 @@ function TourItem(props) {
           {tour.promotion}%
         </Text>,
       );
+      return (
+        <View
+          style={{
+            width: 70,
+            height: 70,
+            position: 'absolute',
+            backgroundColor: 'rgba(254,46,100,0.8)',
+            borderRadius: 50,
+            top: -25,
+            left: -10,
+          }}>
+          {promotion}
+        </View>
+      );
     }
-    return (
-      <View
-        style={{
-          width: 70,
-          height: 70,
-          position: 'absolute',
-          backgroundColor: 'rgba(254,46,100,0.8)',
-          borderRadius: 50,
-          top: -25,
-          left: -10,
-        }}>
-        {promotion}
-      </View>
-    );
   };
 
   return (
@@ -57,18 +57,20 @@ function TourItem(props) {
         <View style={styles.box}>
           <Image style={styles.image} source={{uri: `${tour.tourImg}`}} />
           {renderPromotion()}
-          <Text
-            style={[
-              styles.prince,
-              {
-                textDecorationLine: 'line-through',
-                color: '#fff',
-                top: 100,
-                left: 5,
-              },
-            ]}>
-            {formatPrice(tour.adultUnitPrice)}
-          </Text>
+          {tour.promotion && (
+            <Text
+              style={[
+                styles.prince,
+                {
+                  textDecorationLine: 'line-through',
+                  color: '#fff',
+                  top: 100,
+                  left: 5,
+                },
+              ]}>
+              {formatPrice(tour.adultUnitPrice)}
+            </Text>
+          )}
           <Text style={styles.prince}>
             {formatPrice(tour.adultUnitPrice - promotion)}
           </Text>

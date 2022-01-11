@@ -71,7 +71,6 @@ function PaymenTicketPage(props) {
   const promotion = totalMoneyBooking - sumMoney;
   //tính tiền phụ thu
   const surcharge = checkDiscount === true ? tour.surcharge : 0;
-  console.log(surcharge);
   //sum money tiền vé
   const totalMoney = sumMoney + surcharge;
 
@@ -117,7 +116,6 @@ function PaymenTicketPage(props) {
       .trim()
       .required('* Số điện thoại không để trống')
       .matches(phoneRegExp, '* Số điện thoại không hợp lệ'),
-    address: yup.string().trim().required('*Địa chỉ không được để trống'),
   });
 
   ///render số lượng người và vé
@@ -275,7 +273,7 @@ function PaymenTicketPage(props) {
         <Icon
           name="arrow-back-ios"
           size={28}
-          color="#4682B4"
+          color="rgb(254,46,100)"
           onPress={navigation.goBack}
         />
         <View
@@ -285,7 +283,7 @@ function PaymenTicketPage(props) {
           }}>
           <Text
             style={{
-              color: '#4682B4',
+              color: 'rgb(254,46,100)',
               fontSize: 23,
               fontFamily: 'Montserrat-Medium',
             }}>
@@ -379,16 +377,6 @@ function PaymenTicketPage(props) {
                   onBlur={handleBlur('address')}
                   value={values.address}
                 />
-                {errors.address && (
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: 'red',
-                      fontFamily: 'Poppins-Medium',
-                    }}>
-                    {errors.address}
-                  </Text>
-                )}
               </View>
 
               <View style={[style.ticket]}>
